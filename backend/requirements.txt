@@ -1,0 +1,6 @@
+fastapi>=0.115,<1
+uvicorn>=0.34,<1
+SQLAlchemy>=2.0,<3
+PyMySQL>=1.1,<2
+bcrypt>=4,<6
+PyJWT>=2.10,<3

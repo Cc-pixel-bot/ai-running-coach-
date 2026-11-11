@@ -476,7 +476,7 @@ h1 {
 .movement-complete { display: grid; width: 24px; height: 24px; flex: 0 0 24px; place-items: center; align-self: flex-start; margin-top: 2px; padding: 0; border: 2px solid #d1d5db; border-radius: 50%; background: #fff; transition: background-color .15s ease, border-color .15s ease; }
 .movement-complete.is-complete { border-color: #087df5; background: #087df5; }
 .screen-movement .workout-icon { background: #eef6ff; color: #087df5; }
-.movement-image { height: 142px; border-radius: 12px; background: #eff3f9; }
+.movement-image { display: block; width: 100%; height: 142px; border-radius: 12px; background: #eff3f9; object-fit: cover; }
 .screen-movement .tip { background: #f7f9fc; }
 .screen-movement .bottom-action { position: static; width: 100%; margin-top: auto; padding: 12px 0 8px; }
 .screen-movement .primary-button:disabled { background: #a1a1aa; box-shadow: none; cursor: not-allowed; }

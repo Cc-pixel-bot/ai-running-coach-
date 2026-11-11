@@ -1,0 +1,44 @@
+services:
+  mysql:
+    image: mysql:9.7.4
+    container_name: zhicheng-runner-v1-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: zhicheng_runner_v1
+      MYSQL_USER: zhicheng
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+    ports:
+      - "${MYSQL_PORT:-13307}:3306"
+    volumes:
+      - zhicheng_runner_v1_mysql_data:/var/lib/mysql
+      - ./004.数据库脚本/001_init_mysql.sql:/docker-entrypoint-initdb.d/001_init_mysql.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: ./backend
+    container_name: zhicheng-runner-v1-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql+pymysql://zhicheng:${MYSQL_PASSWORD}@mysql:3306/zhicheng_runner_v1?charset=utf8mb4
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      DIFY_API_BASE_URL: ${DIFY_API_BASE_URL:-http://172.22.0.1/v1}
+      DIFY_PLAN_API_KEY: ${DIFY_PLAN_API_KEY:-}
+      DIFY_ADJUST_API_KEY: ${DIFY_ADJUST_API_KEY:-}
+      FRONTEND_DIR: /app/frontend
+      KNOWLEDGE_BASE_DIR: /app/knowledge
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./003.前端代码/frontend:/app/frontend:ro
+      - ./001.产品相关文件/知识库:/app/knowledge:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  zhicheng_runner_v1_mysql_data:

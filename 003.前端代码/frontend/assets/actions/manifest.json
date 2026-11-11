@@ -1,0 +1,13 @@
+{
+  "ACT-ANKLE": { "name": "踝关节绕环", "src": "ACT-ANKLE.png" },
+  "ACT-LEG-F": { "name": "前后摆腿", "src": "ACT-LEG-F.png" },
+  "ACT-LEG-S": { "name": "左右摆腿", "src": "ACT-LEG-S.png" },
+  "ACT-HIGH-KNEE": { "name": "行进式抬膝", "src": "ACT-HIGH-KNEE.png" },
+  "ACT-HEEL": { "name": "行进式后踢腿", "src": "ACT-HEEL.png" },
+  "ACT-LUNGE": { "name": "行进式弓步", "src": "ACT-LUNGE.png" },
+  "CD-WALK": { "name": "低强度走路", "src": "CD-WALK.png" },
+  "ST-CALF": { "name": "小腿静态拉伸", "src": "ST-CALF.png" },
+  "ST-QUAD": { "name": "大腿前侧静态拉伸", "src": "ST-QUAD.png" },
+  "ST-HAM": { "name": "大腿后侧静态拉伸", "src": "ST-HAM.png" },
+  "ST-GLUTE": { "name": "臀部静态拉伸", "src": "ST-GLUTE.png" }
+}

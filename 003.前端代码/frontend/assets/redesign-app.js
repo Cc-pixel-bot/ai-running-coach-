@@ -12,6 +12,7 @@
   };
   const stateKey = 'zc-redesign-state-v1';
   const authKey = 'zc-redesign-auth-v1';
+  const tokenKey = 'zc-access-token-v1';
   const page = document.body.dataset.page || '';
   document.documentElement.dataset.page = decodeURIComponent(location.pathname.split('/').pop() || '');
   document.documentElement.classList.add('zc-ready');
@@ -25,6 +26,16 @@
   }
   let state = read(stateKey);
   function save() { write(stateKey, state); }
+  function token() { return localStorage.getItem(tokenKey) || ''; }
+  async function api(path, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (token()) headers.Authorization = `Bearer ${token()}`;
+    const response = await fetch(`/api${path}`, { ...options, headers });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.detail || `请求失败（${response.status}）`);
+    return data;
+  }
+  if (page !== 'login' && !token()) { window.location.replace(encodeURI(pageFiles[1])); return; }
   function go(number) {
     const file = pageFiles[number];
     if (file) window.location.href = encodeURI(file);
@@ -40,6 +51,13 @@
   });
   function profile() { state.profile ||= {}; return state.profile; }
   function notify(message) { window.alert(message); }
+  if (page !== 'login' && token() && !state.profile?.height) {
+    api('/profile').then(({ profile: saved }) => {
+      if (!saved) return;
+      Object.assign(profile(), { height: saved.height, weight: saved.weight, goal: '完成 10 公里', 'longest-run': saved.longestRunKm, 'latest-10k': saved.latest10kMinutes, 'train-days': saved.trainDays, targetMinutes: saved.targetMinutes, health: saved.health || [] });
+      save(); window.location.reload();
+    }).catch(() => {});
+  }
   function setAction(button, label, action) {
     if (!button) return;
     button.dataset.action = action;
@@ -70,7 +88,7 @@
     if (target) { item.dataset.route = String(target); item.setAttribute('role', 'button'); item.setAttribute('tabindex', '0'); }
   });
 
-  // Login/register. Authentication is a front-end prototype until a backend exists.
+  // Login/register via the backend API.
   if (page === 'login') {
     const tabs = [...document.querySelectorAll('.auth-tabs span')];
     const card = document.querySelector('.auth-card');
@@ -78,13 +96,27 @@
     const confirmField = document.getElementById('confirm-field');
     const confirmInput = document.getElementById('confirm-password-input');
     let mode = 'login';
-    const submit = () => {
+    const submit = async () => {
       const username = value('account-input'); const pass = value('password-input');
       const input = document.getElementById('account-input');
       if (!/^[A-Za-z0-9]+$/.test(username)) { input.setCustomValidity('账号只能使用英文字母和数字'); input.reportValidity(); input.setCustomValidity(''); return; }
       if (pass.length < 6) { const pw = document.getElementById('password-input'); pw.setCustomValidity('密码至少需要 6 位'); pw.reportValidity(); pw.setCustomValidity(''); return; }
       if (mode === 'register' && pass !== value('confirm-password-input')) { confirmInput.setCustomValidity('两次输入的密码不一致'); confirmInput.reportValidity(); confirmInput.setCustomValidity(''); return; }
-      write(authKey, { username }); go(2);
+      if (button) button.disabled = true;
+      try {
+        const result = await api(mode === 'register' ? '/auth/register' : '/auth/login', {
+          method: 'POST', body: JSON.stringify({ account: username, password: pass })
+        });
+        localStorage.setItem(tokenKey, result.accessToken);
+        write(authKey, { username });
+        const saved = await api('/profile');
+        if (saved.profile) {
+          const p = saved.profile;
+          Object.assign(profile(), { height: p.height, weight: p.weight, goal: '完成 10 公里', 'longest-run': p.longestRunKm, 'latest-10k': p.latest10kMinutes, 'train-days': p.trainDays, targetMinutes: p.targetMinutes, health: p.health || [] });
+          save(); go(9);
+        } else go(2);
+      } catch (error) { notify(error.message); }
+      finally { if (button) button.disabled = false; }
     };
     const renderMode = (nextMode) => {
       mode = nextMode;
@@ -209,38 +241,107 @@
       if (edit) { edit.setAttribute('role', 'button'); edit.tabIndex = 0; edit.dataset.route = String(editPages[index]); }
     });
     document.querySelector('.action button')?.addEventListener('click', () => {
-      if (!p.goal || !p.height || !p.weight || !p['longest-run'] || !p.latest10k && !p['latest-10k'] || !p['train-days'] || !p.targetMinutes || !p.health?.length) { notify('请先完成所有建档信息。'); return; }
-      go(8);
+      if (!p.goal || !p.height || !p.weight || !p['longest-run'] || !p['train-days'] || !p.targetMinutes || !p.health?.length) { notify('请先完成所有建档信息。'); return; }
+      api('/profile', { method: 'PUT', body: JSON.stringify({ height: Number(p.height), weight: Number(p.weight), goal: p.goal, longestRunKm: Number(p['longest-run']), latest10kMinutes: p['latest-10k'] ? Number(p['latest-10k']) : null, trainDays: Number(p['train-days']), targetMinutes: Number(p.targetMinutes), health: p.health, healthStatus: p.health.join('、') }) })
+        .then(() => go(8)).catch((error) => notify(error.message));
     });
   }
 
-  // Plan pages.
+  // Generate and adjust plans through the configured Dify workflows on the backend.
   if (page === 'plan-generation' || page === 'plan-adjust') {
-    let step = 0;
     const cta = document.getElementById('ctaBtn');
+    if (cta) cta.disabled = true;
     const steps = [...document.querySelectorAll('main h4')];
-    const timer = window.setInterval(() => {
-      step = Math.min(step + 1, 4);
-      steps.forEach((heading, index) => {
-        const box = heading.closest('.flex.items-start');
-        const status = box?.querySelector('span[class*="text-[10px]"]');
-        if (status) status.textContent = index < step ? '已完成' : index === step ? '进行中' : '等待中';
-        const icon = box?.querySelector('.w-6.h-6');
-        if (icon && index < step) { icon.textContent = '✓'; icon.classList.add('bg-emerald-500/20'); }
-      });
-      if (step >= 4) {
-        window.clearInterval(timer);
-        if (cta) { cta.disabled = false; const label = cta.querySelector('span:last-child'); if (label) label.textContent = page === 'plan-adjust' ? '查看调整结果' : '查看训练计划'; const spinner = cta.querySelector('.animate-spin'); if (spinner) spinner.textContent = '✓'; }
+    const setProgress = (done) => steps.forEach((heading, index) => {
+      const box = heading.closest('.flex.items-start');
+      const status = box?.querySelector('span[class*="text-[10px]"]');
+      if (status) status.textContent = done ? '已完成' : index === 0 ? '进行中' : '等待中';
+    });
+    setProgress(false);
+    if (page === 'plan-generation') state.planRequestKey ||= crypto.randomUUID();
+    let taskSucceeded = false;
+    const task = page === 'plan-adjust'
+      ? api(`/training-records/${state.trainingRecordId}/adjust-plan`, { method: 'POST' })
+      : api('/plans/generate', { method: 'POST', headers: { 'Idempotency-Key': state.planRequestKey } });
+    if (page === 'plan-adjust') state.previousPlan = state.activePlan;
+    task.then((result) => {
+      taskSucceeded = true; state.activePlan = result.plan;
+      if (page === 'plan-adjust') { state.adjustment = result.adjustment || null; state.feedbackAnalysis = result.feedbackAnalysis || ''; state.warmupStretchSources = result.warmupStretchSources || []; }
+      if (page === 'plan-generation') delete state.planRequestKey; save(); setProgress(true);
+      if (cta) { cta.disabled = false; const label = cta.querySelector('span:last-child'); if (label) label.textContent = page === 'plan-adjust' ? '查看调整结果' : '查看训练计划'; const spinner = cta.querySelector('.animate-spin'); if (spinner) spinner.textContent = '✓'; }
+    }).catch((error) => {
+      if (cta) { cta.disabled = false; const label = cta.querySelector('span:last-child'); if (label) label.textContent = '重试'; }
+      notify(error.message);
+    });
+    cta?.addEventListener('click', () => { if (!taskSucceeded) { window.location.reload(); return; } go(page === 'plan-adjust' ? 18 : 9); });
+  }
+  if (page === 'plan-home' || page === 'plan-overview') {
+    api('/plans/active').then(({ plan }) => {
+      if (!plan) { if (page === 'plan-home') notify('还没有训练计划，请先生成计划。'); return; }
+      state.activePlan = plan; save();
+      if (page === 'plan-home') {
+        api('/workouts/today').then(({ workout }) => {
+          if (!workout) return;
+          if (state.workoutId && state.workoutId !== workout.id) {
+            delete state.trainingRecordId; delete state.feedbackId; delete state.feedbackAnalysis; delete state.feedback; delete state.run;
+          }
+          state.workoutId = workout.id; save();
+          const title = document.querySelector('.today-card h2'); if (title) title.textContent = `${workout.courseKey || '课程'} · ${workout.courseName || workout.title}`;
+          const metrics = document.querySelectorAll('.today-metrics .metric strong');
+          if (metrics[0]) metrics[0].innerHTML = `${workout.distanceKm ?? '—'} <small>km</small>`;
+          if (metrics[2]) metrics[2].innerHTML = `${workout.durationMin ?? '—'} <small>分</small>`;
+        }).catch((error) => notify(error.message));
       }
-    }, 650);
-    cta?.addEventListener('click', () => { if (step < 4) return; go(page === 'plan-adjust' ? 18 : 9); });
+      if (page === 'plan-overview') {
+        const heading = document.querySelector('main h1'); if (heading) heading.textContent = plan.title;
+        const total = plan.workouts.length;
+        const completed = plan.workouts.filter((item) => item.status === 'completed').length;
+        const percent = total ? Math.round(completed * 100 / total) : 0;
+        const progress = document.querySelector('main svg circle[stroke-dasharray] + circle');
+        if (progress) progress.setAttribute('stroke-dashoffset', String(251.32 * (1 - percent / 100)));
+        const progressText = document.querySelector('main .absolute.inset-0 span');
+        if (progressText) progressText.innerHTML = `${percent}<span class="text-[11px] font-semibold text-[#007AFF]">%</span>`;
+        const progressCaption = document.querySelector('main .absolute.inset-0 span:nth-child(2)');
+        if (progressCaption) progressCaption.textContent = `${completed}/${total} 节`;
+        const period = [...document.querySelectorAll('main span')].find((el) => el.textContent.trim() === '计划周期');
+        if (period?.parentElement?.lastElementChild) period.parentElement.lastElementChild.textContent = `共 ${plan.weeks} 周`;
+        const frequency = [...document.querySelectorAll('main span')].find((el) => el.textContent.trim() === '频次 & 总量');
+        if (frequency?.parentElement?.lastElementChild) frequency.parentElement.lastElementChild.textContent = `每周最多 ${plan.trainDays} 次 · ${total} 节训练`;
+        const timeline = document.querySelector('main .relative.flex.flex-col.pl-2');
+        if (timeline) {
+          timeline.replaceChildren();
+          for (let week = 1; week <= plan.weeks; week++) {
+            const rows = plan.workouts.filter((w) => w.week === week);
+            const details = document.createElement('details'); details.open = week === 1; details.className = `group relative ${week === plan.weeks ? 'mb-2' : 'mb-6'} z-10`;
+            const summary = document.createElement('summary'); summary.className = 'list-none cursor-pointer flex items-center gap-3 select-none';
+            const completedWeek = rows.filter((item) => item.status === 'completed').length;
+            const badge = document.createElement('div'); badge.className = completedWeek === rows.length && rows.length ? 'w-9 h-9 rounded-full bg-[#34C759] text-white flex items-center justify-center font-bold text-[13px] shadow-[0_2px_8px_rgba(52,199,89,0.35)] shrink-0 ring-4 ring-[#F8F9FA]' : 'w-9 h-9 rounded-full bg-white border border-[#C1C6D7] text-[#717786] flex items-center justify-center font-bold text-[13px] shrink-0 ring-4 ring-[#F8F9FA]'; badge.textContent = `W${week}`;
+            const summaryInner = document.createElement('div'); summaryInner.className = 'flex-1 flex items-center justify-between min-w-0 pr-1 py-1';
+            const weekName = document.createElement('span'); weekName.className = 'text-[14px] font-bold text-[#1D1D1F]'; weekName.textContent = `第 ${week} 周`;
+            const count = document.createElement('span'); count.className = completedWeek === rows.length && rows.length ? 'text-[11px] font-semibold text-[#34C759]' : 'text-[11px] text-[#86868B]'; count.textContent = `${completedWeek}/${rows.length} ${completedWeek === rows.length && rows.length ? '已完成' : '待开始'}`;
+            summaryInner.append(weekName, count); summary.append(badge, summaryInner);
+            const body = document.createElement('div'); body.className = 'ml-[18px] pl-6 pt-1.5 flex flex-col';
+            rows.forEach((w) => {
+              const row = document.createElement('div'); row.className = `relative ${w.status === 'in_progress' ? 'py-3' : 'py-2.5'} flex items-center justify-between gap-3 whitespace-nowrap`;
+              const dot = document.createElement('div'); dot.className = `absolute -left-[28px] top-1/2 -translate-y-1/2 ${w.status === 'in_progress' ? 'w-2.5 h-2.5 rounded-full bg-[#007AFF]' : 'w-2 h-2 rounded-full bg-[#C1C6D7]'} ring-2 ring-[#F8F9FA]`;
+              const labelWrap = document.createElement('div'); labelWrap.className = 'flex items-center gap-2.5 min-w-0 flex-1';
+              const dayLabel = document.createElement('span'); dayLabel.className = `text-[12px] ${w.status === 'in_progress' ? 'font-bold text-[#007AFF]' : 'font-semibold text-[#86868B]'} shrink-0`; dayLabel.textContent = `Day ${w.day}`;
+              const name = document.createElement('span'); name.className = `text-[13px] ${w.status === 'in_progress' ? 'font-bold' : 'font-medium'} text-[#1D1D1F] truncate`; name.textContent = `${w.courseKey || w.courseId || '课程'} · ${w.courseName || w.title}`;
+              labelWrap.append(dayLabel, name);
+              const right = document.createElement('div'); right.className = 'flex items-center gap-2 shrink-0';
+              const meta = document.createElement('span'); meta.className = 'text-[11px] text-[#86868B]'; meta.textContent = `${w.distanceKm != null ? `${w.distanceKm} km` : ''}${w.distanceKm != null && w.durationMin ? ' · ' : ''}${w.durationMin ? `${w.durationMin}分` : ''}`;
+              const stateLabel = document.createElement('span'); stateLabel.className = 'text-[11px] text-[#86868B]'; stateLabel.textContent = w.status === 'completed' ? '已完成' : w.status === 'in_progress' ? '进行中' : '待开始';
+              right.append(meta, stateLabel); row.append(dot, labelWrap, right);
+              if (w.status === 'scheduled' && !timeline.querySelector('[data-first-workout]')) { row.dataset.firstWorkout = 'true'; row.tabIndex = 0; row.setAttribute('role', 'button'); row.dataset.route = '11'; row.addEventListener('click', () => { state.workoutId = w.id; save(); }); }
+              body.append(row);
+            });
+            details.append(summary, body); timeline.append(details);
+          }
+        }
+      }
+    }).catch((error) => notify(error.message));
   }
   if (page === 'plan-home') {
-    const p = profile();
-    const distance = document.querySelector('.today-metrics .metric strong');
-    const time = document.querySelectorAll('.today-metrics .metric strong')[2];
-    if (distance && p['longest-run']) distance.innerHTML = `${p['longest-run']} <small>km</small>`;
-    if (time && p['latest-10k']) time.innerHTML = `${Math.round(Number(p['latest-10k']) * .58)} <small>分</small>`;
     const buttons = document.querySelectorAll('.plan-home .primary-button, .today-card .primary-button');
     buttons.forEach((b) => b.dataset.route = '11');
     const textLinks = [...document.querySelectorAll('.today-card div')];
@@ -254,7 +355,34 @@
     document.querySelectorAll('button').forEach((button) => { if (button.textContent.includes('去开跑')) button.dataset.route = '11'; });
     document.querySelectorAll('.icon-button, header button[aria-label="返回"], header button').forEach((el) => { if (el.textContent.trim() === '‹' || el.getAttribute('aria-label') === '返回') el.dataset.route = '9'; });
   }
-  if (page === 'training') document.querySelector('.primary-button')?.setAttribute('data-route', '12');
+  if (page === 'training') {
+    api('/workouts/today').then(({ workout }) => {
+      if (!workout) return;
+      if (state.workoutId && state.workoutId !== workout.id) {
+        delete state.trainingRecordId; delete state.feedbackId; delete state.feedbackAnalysis; delete state.feedback; delete state.run;
+      }
+      state.workoutId = workout.id; save();
+      const title = document.querySelector('.workout-title');
+      if (title) title.textContent = `${workout.courseKey || '课程'} · ${workout.courseName || workout.title}`;
+      const value = document.querySelector('[data-workout-value]');
+      if (value) value.textContent = workout.distanceKm != null ? `${workout.distanceKm} km` : `${workout.durationMin ?? '—'} 分钟`;
+    }).catch((error) => notify(error.message));
+    document.querySelector('.primary-button')?.addEventListener('click', async (event) => {
+    event.currentTarget.disabled = true;
+    try {
+      if (!state.workoutId) {
+        const today = await api('/workouts/today');
+        if (!today.workout) throw new Error('当前没有待开始的训练，请先生成计划。');
+        state.workoutId = today.workout.id;
+      }
+      if (!state.trainingRecordId) {
+        const result = await api(`/workouts/${state.workoutId}/start`, { method: 'POST' });
+        state.trainingRecordId = result.trainingRecordId; save();
+      }
+      go(12);
+    } catch (error) { notify(error.message); event.currentTarget.disabled = false; }
+    });
+  }
   if (page === 'warmup' || page === 'stretch') {
     const cards = [...document.querySelectorAll('.movement-card')];
     const button = document.querySelector('.primary-button');
@@ -298,7 +426,9 @@
       window.cancelAnimationFrame(holdFrame);
       window.clearInterval(timer);
       state.run = { seconds, distance: Number((seconds * .00278).toFixed(2)), completedAt: Date.now() };
-      save(); go(14);
+      save();
+      const saveRun = state.trainingRecordId ? api(`/training-records/${state.trainingRecordId}/finish`, { method: 'POST', body: JSON.stringify({ distanceKm: state.run.distance, durationMin: Number((seconds / 60).toFixed(2)), completed: seconds > 0 }) }) : Promise.resolve();
+      saveRun.then(() => go(14)).catch((error) => notify(error.message));
     };
     const updateHoldProgress = (now) => {
       if (!holdStart || runEnded) return;
@@ -335,7 +465,7 @@
     });
   }
   if (page === 'complete') {
-    const run = state.run || { distance: 6, seconds: 2160 };
+    const run = state.run || { distance: 0, seconds: 0 };
     const vals = document.querySelectorAll('.training-summary-value');
     const mins = Math.max(1, Math.round(run.seconds / 60));
     if (vals[0]) vals[0].textContent = Number(run.distance).toFixed(1);
@@ -348,6 +478,13 @@
   // Feedback controls, ratings, tags, optional note and local photo selection.
   if (page === 'feedback') {
     const feedback = state.feedback || { scores: {}, parts: [] };
+    const workoutLabel = document.querySelector('[data-feedback-workout]');
+    if (workoutLabel) api('/plans/active').then(({ plan }) => {
+      const workout = plan?.workouts?.find((item) => item.id === state.workoutId);
+      if (!workout) return;
+      const amount = workout.distanceKm != null ? `${workout.distanceKm} km` : workout.durationMin != null ? `${workout.durationMin} 分钟` : '';
+      workoutLabel.textContent = `${workout.courseKey || workout.courseId || '课程'} · ${workout.courseName || workout.title}${amount ? ` · ${amount}` : ''}`;
+    }).catch((error) => notify(error.message));
     ['subjective', 'physical', 'pain'].forEach((key) => {
       const container = document.getElementById(`stars-${key}`); if (!container) return;
       container.innerHTML = Array.from({ length: 5 }, (_, i) => `<button type="button" aria-label="${i + 1} 分" aria-pressed="${i < (feedback.scores[key] || 0)}" data-rating="${i + 1}" class="rating-star transition-transform active:scale-125 focus:outline-none p-0.5"><svg class="w-7 h-7 drop-shadow-sm" fill="${i < (feedback.scores[key] || 0) ? '#ff9800' : '#cbd5e1'}" viewBox="0 0 24 24"><path style="fill:${i < (feedback.scores[key] || 0) ? '#ff9800' : '#cbd5e1'} !important" d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button>`).join('');
@@ -383,12 +520,52 @@
     document.getElementById('submit-btn')?.addEventListener('click', () => {
       if (!['subjective', 'physical', 'pain'].every((key) => Number(feedback.scores[key]) >= 1 && Number(feedback.scores[key]) <= 5)) { notify('请完成三项训练感受评分后提交。'); return; }
       if (feedback.discomfort !== true && feedback.discomfort !== false) { notify('请选择是否有局部不适后提交。'); return; }
-      feedback.comment = comment?.value || ''; feedback.location = locationInput?.value || ''; state.feedback = feedback; save(); go(17);
+      feedback.comment = comment?.value || ''; feedback.location = locationInput?.value || ''; state.feedback = feedback; save();
+      if (!state.trainingRecordId) { notify('找不到本次训练记录，请从今日训练重新开始。'); return; }
+      api(`/training-records/${state.trainingRecordId}/feedback`, { method: 'POST', body: JSON.stringify({ subjective: Number(feedback.scores.subjective), physical: Number(feedback.scores.physical), pain: Number(feedback.scores.pain), discomfort: feedback.discomfort, discomfortParts: [...feedback.parts, ...(feedback.location ? [feedback.location] : [])], note: feedback.comment, completion: state.run?.seconds ? 'completed' : 'partial' }) })
+        .then((result) => { state.feedbackId = result.feedbackId; state.feedbackAnalysis = result.analysis; save(); go(17); })
+        .catch((error) => notify(error.message));
     });
   }
   if (page === 'plan-changes') {
     document.querySelectorAll('button').forEach((button) => { if (button.textContent.includes('返回计划')) button.dataset.route = '9'; });
     const headerBack = document.querySelector('header button'); if (headerBack) headerBack.dataset.route = '9';
+    const before = state.previousPlan?.workouts || [];
+    const after = state.activePlan?.workouts || [];
+    const changed = after.filter((item) => item.status === 'scheduled').map((item) => {
+      const prior = before.find((candidate) => candidate.week === item.week && candidate.day === item.day);
+      return prior && (prior.courseKey !== item.courseKey || prior.title !== item.title || prior.type !== item.type || prior.durationMin !== item.durationMin || prior.distanceKm !== item.distanceKm || prior.intensity !== item.intensity || prior.talkTest !== item.talkTest) ? { prior, item } : null;
+    }).filter(Boolean).slice(0, 3);
+    const list = document.querySelector('[data-purpose="specific-changes-section"] .space-y-3');
+    if (list) {
+      list.replaceChildren();
+      changed.forEach(({ prior, item }, index) => {
+        const card = document.createElement('article'); card.className = `bg-navy-850/75 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-3.5 animate-fade-slide stagger-${Math.min(index + 1, 3)} shadow-[0_4px_20px_rgba(0,0,0,0.3)]`; card.dataset.purpose = 'change-item';
+        const top = document.createElement('div'); top.className = 'flex items-center justify-between pb-2 border-b border-white/[0.06] mb-2.5';
+        const badge = document.createElement('span'); badge.className = 'text-[12px] font-semibold tracking-wide text-white bg-white/[0.06] px-2 py-0.5 rounded border border-white/10'; badge.textContent = `第 ${item.week} 周 · Day ${item.day}`; top.append(badge);
+        const comparison = document.createElement('div'); comparison.className = 'flex items-center justify-between gap-2 text-[13px]';
+        const oldBox = document.createElement('div'); oldBox.className = 'flex flex-col gap-0.5 shrink-0 w-28';
+        const oldLabel = document.createElement('span'); oldLabel.className = 'text-[11px] text-slate-400 font-medium'; oldLabel.textContent = '原计划';
+        const oldName = document.createElement('span'); oldName.className = 'text-slate-300 font-normal'; oldName.textContent = `${prior.courseKey || prior.courseId || '课程'} · ${prior.courseName || prior.title}`;
+        const workoutMeta = (workout) => [workout.distanceKm != null ? `${workout.distanceKm} km` : workout.durationMin != null ? `${workout.durationMin} 分钟` : '', workout.intensity].filter(Boolean).join(' · ');
+        const oldMeta = document.createElement('span'); oldMeta.className = 'text-[10px] text-slate-400'; oldMeta.textContent = workoutMeta(prior); oldBox.append(oldLabel, oldName, oldMeta);
+        const arrow = document.createElement('span'); arrow.className = 'text-cyan-400 shrink-0 mr-auto'; arrow.textContent = '→';
+        const newBox = document.createElement('div'); newBox.className = 'flex flex-col gap-0.5 text-right shrink-0';
+        const newLabel = document.createElement('span'); newLabel.className = 'text-[11px] text-cyan-400 font-medium'; newLabel.textContent = '调整后计划';
+        const newName = document.createElement('span'); newName.className = 'text-cyan-300 font-semibold truncate'; newName.textContent = `${item.courseKey || item.courseId || '课程'} · ${item.courseName || item.title}`;
+        const newMeta = document.createElement('span'); newMeta.className = 'text-[10px] text-cyan-200'; newMeta.textContent = workoutMeta(item); newBox.append(newLabel, newName, newMeta);
+        comparison.append(oldBox, arrow, newBox); card.append(top, comparison); list.append(card);
+      });
+      if (!changed.length) { const card = document.createElement('div'); card.className = 'bg-navy-850/75 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 text-[13px] text-slate-300'; card.textContent = state.adjustment?.status === 'maintain' ? '本次计划保持不变。' : '本次没有需要变更的后续课程。'; list.append(card); }
+    }
+    const note = document.querySelector('[data-purpose="explanation-section"] .space-y-3');
+    if (note) {
+      note.replaceChildren();
+      const lines = String(state.feedbackAnalysis || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const reason = state.adjustment?.reason; if (reason) lines.push(`调整原因=${reason}`);
+      if (!lines.length) lines.push('Dify 未返回反馈分析说明。');
+      lines.forEach((line) => { const entry = document.createElement('div'); entry.className = 'flex items-start gap-2.5'; const dot = document.createElement('span'); dot.className = 'w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 shrink-0'; const text = document.createElement('p'); text.className = 'text-slate-300'; text.textContent = line; entry.append(dot, text); note.append(entry); });
+    }
   }
   if (page === 'mine') {
     const rows = [...document.querySelectorAll('.menu-row')];
@@ -401,7 +578,7 @@
     const target = event.target.closest('[data-route], [data-action]'); if (!target) return;
     if (target.dataset.route) { const n = Number(target.dataset.route); if (n) go(n); return; }
     if (target.dataset.action === 'back') { go(backTargets[page] || 1); return; }
-    if (target.dataset.action === 'logout') { sessionStorage.removeItem(stateKey); sessionStorage.removeItem(authKey); go(1); }
+    if (target.dataset.action === 'logout') { sessionStorage.removeItem(stateKey); sessionStorage.removeItem(authKey); localStorage.removeItem(tokenKey); go(1); }
   });
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;

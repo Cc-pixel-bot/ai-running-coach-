@@ -1,30 +1,13 @@
-# 前端原型
+# 前端原型与 API
 
-当前应用使用原生 HTML、CSS 和 JavaScript，无需安装依赖或构建。
+当前应用使用原生 HTML、CSS 和 JavaScript。页面源码位于 `pages/`，共享样式和流程脚本位于 `assets/`。
 
-## 目录
-
-```text
-frontend/
-├─ index.html       应用入口
-├─ pages/           唯一页面源码（01–19）
-├─ assets/          页面共享样式、脚本和图片
-└─ redesign/        旧页面地址的兼容跳转，不放页面实现
-```
-
-页面公共行为由 `assets/redesign-app.js` 管理；共享样式由 `assets/redesign.css` 管理。部分页面还使用 `assets/mobile.css`。
-
-## 本地运行
+现在的流程会调用同源 `/api` 接口；请从项目根目录通过 Docker Compose 启动完整应用，不要用 Python 静态服务器代替 API 服务：
 
 ```powershell
-cd .\003.前端代码\frontend
-python -m http.server 8080
+docker compose up --build -d
 ```
 
-访问 `http://localhost:8080/`。也可直接访问 `pages/` 下对应页面。`redesign/` 中的旧地址会自动转到相同的 `pages/` 文件。
+然后访问 `http://localhost:8000/`。后端接口文档在 `http://localhost:8000/docs`。有关数据库隔离、Navicat 连接及停止方式，见项目根目录 `README.md`。
 
-## 说明
-
-- `pages/` 是唯一维护入口。新增或修改页面时，不要复制一份到 `redesign/`。
-- `assets/navigation.js` 是旧版原型脚本；当前页面流程使用 `assets/redesign-app.js`。
-- 当前没有后端服务、数据库脚本、包管理器配置或构建步骤；页面仍是原型。
+`redesign/` 仅为旧页面地址的兼容跳转目录，不放页面实现。
