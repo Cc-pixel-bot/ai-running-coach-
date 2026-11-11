@@ -1,0 +1,1800 @@
+/* Shared mobile product shell for the static prototype. */
+/* 训练反馈页顶部标题栏不显示底部横线。 */
+/* 等待页面初始化完成后再显示，避免旧结构短暂闪现。 */
+html:not(.zc-ready) {
+  visibility: hidden;
+}
+
+html.zc-ready {
+  visibility: visible;
+}
+
+html[data-page^="16 "] header.fixed {
+  border-bottom: 1px solid #eef0f4 !important;
+  box-shadow: none !important;
+}
+/* 训练相关主按钮统一使用训练感受页提交按钮的蓝色。 */
+html[data-page^="11 "] #startWarmupBtn,
+html[data-page^="12 "] main > div:last-child > button,
+html[data-page^="14 "] main div.fixed.inset-x-0 > button {
+  background: #0058bc !important;
+}
+html[data-page^="11 "] #startWarmupBtn:hover,
+html[data-page^="12 "] main > div:last-child > button:hover,
+html[data-page^="14 "] main div.fixed.inset-x-0 > button:hover {
+  background: #004a9f !important;
+}
+/* 训练反馈页：移除顶部训练卡，统一五个四角芒星并压缩为单屏。 */
+html[data-page^="16 "] body,
+html[data-page^="16 "] main {
+  background: #fff !important;
+  overflow: hidden !important;
+}
+html[data-page^="16 "] header > div > button[aria-label="返回"] {
+  display: none !important;
+}
+html[data-page^="16 "] header,
+html[data-page^="16 "] header > div {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+html[data-page^="16 "] main > div.px-4.pt-3\.5.pb-2 {
+  display: none !important;
+}
+html[data-page^="16 "] main {
+  padding-top: 49px !important;
+  padding-bottom: 0 !important;
+}
+html[data-page^="16 "] main > section {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+html[data-page^="16 "] main > section:first-of-type {
+  gap: 8px !important;
+}
+html[data-page^="16 "] main > section:first-of-type > div.flex.flex-col.gap-2.pt-1 {
+  gap: 2px !important;
+  padding-top: 0 !important;
+}
+html[data-page^="16 "] main > section:first-of-type > div.flex.flex-col.gap-2.pt-1 > div.flex.items-center.justify-between.pt-1 {
+  padding-top: 0 !important;
+}
+html[data-page^="16 "] #stars-subjective,
+html[data-page^="16 "] #stars-physical,
+html[data-page^="16 "] #stars-pain {
+  display: flex !important;
+  width: 100% !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+html[data-page^="16 "] #stars-subjective button,
+html[data-page^="16 "] #stars-physical button,
+html[data-page^="16 "] #stars-pain button {
+  padding: 0 !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+html[data-page^="16 "] #stars-subjective svg,
+html[data-page^="16 "] #stars-physical svg,
+html[data-page^="16 "] #stars-pain svg {
+  width: 24px !important;
+  height: 24px !important;
+  fill: #cbd5e1 !important;
+  opacity: 1 !important;
+}
+html[data-page^="16 "] #stars-subjective svg path,
+html[data-page^="16 "] #stars-physical svg path,
+html[data-page^="16 "] #stars-pain svg path {
+  fill: #cbd5e1 !important;
+}
+html[data-page^="16 "] #stars-subjective button.is-active svg,
+html[data-page^="16 "] #stars-physical button.is-active svg,
+html[data-page^="16 "] #stars-pain button.is-active svg,
+html[data-page^="16 "] #stars-subjective button.is-active svg path,
+html[data-page^="16 "] #stars-physical button.is-active svg path,
+html[data-page^="16 "] #stars-pain button.is-active svg path {
+  fill: #0ea5e9 !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(2),
+html[data-page^="16 "] main > section:nth-of-type(3) {
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(2) .mb-2\.5,
+html[data-page^="16 "] main > section:nth-of-type(3) .mb-2 {
+  margin-bottom: 4px !important;
+}
+html[data-page^="16 "] #comment-box {
+  min-height: 54px !important;
+  height: 54px !important;
+  padding: 4px 12px 8px !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(3) .mt-5 {
+  margin-top: 6px !important;
+}
+html[data-page^="16 "] #submit-btn {
+  height: 40px !important;
+}
+html[data-page^="16 "] main > section:first-of-type {
+  padding-top: 14px !important;
+  padding-bottom: 12px !important;
+  gap: 12px !important;
+}
+html[data-page^="16 "] main > section:first-of-type > div.flex.flex-col.gap-2.pt-1 {
+  gap: 10px !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(2),
+html[data-page^="16 "] main > section:nth-of-type(3) {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(3) .mt-5 {
+  margin-top: 14px !important;
+  justify-content: center !important;
+}
+html[data-page^="16 "] main {
+  padding-top: 84px !important;
+}
+html[data-page^="16 "] main > section:first-of-type {
+  width: calc(100% - 32px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 16px 18px 34px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+}
+html[data-page^="16 "] main > section:first-of-type::before {
+  display: none !important;
+}
+html[data-page^="16 "] main > section:first-of-type > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+html[data-page^="16 "] main > section:first-of-type > div.flex.items-center.justify-between {
+  margin-bottom: 4px !important;
+}
+html[data-page^="16 "] header.fixed { box-shadow: none !important; }
+html[data-page^="16 "] main > section:nth-of-type(2) {
+  width: calc(100% - 32px) !important;
+  margin: 12px auto 0 !important;
+  padding: 16px 18px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(2) > div.grid {
+  margin-top: 10px !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(3) {
+  width: calc(100% - 32px) !important;
+  margin: 12px auto 0 !important;
+  padding: 16px 18px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+}
+html[data-page^="16 "] #submit-btn {
+  width: 180px !important;
+}
+html[data-page^="16 "] main span.w-1\.5.rounded-full {
+  background: #0058bc !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(3) > .relative {
+  background: #fff !important;
+  margin-top: 6px !important;
+}
+html[data-page^="16 "] #comment-box ~ div button {
+  display: none !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(3) > div.flex.items-center.justify-between.mb-2 > span {
+  font-size: 0 !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(3) > div.flex.items-center.justify-between.mb-2 > span::after {
+  content: "训练感受";
+  font-size: 13px;
+}
+/* 完成训练页重新设计：白底、居中运动图标和单屏双按钮。 */
+html[data-page^="15 "] { background:#faf8fe !important; overflow:hidden !important; }
+html[data-page^="15 "] body, html[data-page^="15 "] main { height:100dvh !important; min-height:0 !important; overflow:hidden !important; background:#fff !important; }
+html[data-page^="15 "] main > div { box-sizing:border-box !important; width:100% !important; max-width:428px !important; min-height:100dvh !important; padding:72px 24px 36px !important; gap:28px !important; justify-content:center !important; align-items:center !important; }
+html[data-page^="15 "] main > div > section:first-of-type { width:100% !important; margin:0 !important; gap:22px !important; align-items:center !important; }
+html[data-page^="15 "] main > div > section:first-of-type > div.relative { width:116px !important; height:116px !important; margin:0 !important; }
+html[data-page^="15 "] main > div > section:first-of-type > div.relative > div.relative { width:92px !important; height:92px !important; }
+html[data-page^="15 "] main > div > section:first-of-type svg.w-10 { width:56px !important; height:56px !important; }
+html[data-page^="15 "] main > div > section:first-of-type h1 { font-size:32px !important; line-height:1.25 !important; text-align:center !important; white-space:nowrap !important; }
+html[data-page^="15 "] main > div > section:nth-of-type(2) { display:flex !important; flex-direction:column !important; aspect-ratio:auto !important; }
+html[data-page^="15 "] main > div > section:nth-of-type(3) { width:100% !important; gap:14px !important; margin:0 !important; align-items:center !important; }
+html[data-page^="15 "] main > div > section:nth-of-type(3) button { width:100% !important; }
+/* 训练反馈页顶部标题栏使用浅色细分隔线。 */
+html[data-page^="16 "] header.fixed {
+  border-bottom: 1px solid #eef0f4 !important;
+  box-shadow: none !important;
+}
+
+/* AI 计划调整页与计划对比页：统一为 AI 计划生成页的白色页面体系。 */
+html[data-page^="17 "],
+html[data-page^="17 "] body,
+html[data-page^="17 "] body > div,
+html[data-page^="18 "],
+html[data-page^="18 "] body,
+html[data-page^="18 "] body > div {
+  background: #fff !important;
+}
+
+html[data-page^="17 "] body,
+html[data-page^="18 "] body {
+  color: #111827 !important;
+}
+
+html[data-page^="17 "] header.fixed,
+html[data-page^="18 "] header[data-purpose="top-navigation"] {
+  background: #fff !important;
+  border-bottom: 1px solid #eef0f4 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-page^="17 "] header.fixed button,
+html[data-page^="18 "] header[data-purpose="top-navigation"] button {
+  color: #111827 !important;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+html[data-page^="17 "] body > div {
+  color: #111827 !important;
+}
+
+html[data-page^="17 "] body > div > div[class*="absolute"] {
+  opacity: .35 !important;
+}
+
+html[data-page^="17 "] body > div > div > h1,
+html[data-page^="17 "] body > div > div > p {
+  color: #111827 !important;
+}
+
+html[data-page^="17 "] main > div[class*="bg-slate-900"],
+html[data-page^="17 "] main > div[class*="bg-slate-900"] > div[class*="bg-slate-800"],
+html[data-page^="17 "] main > div[class*="bg-slate-900"] > div[class*="bg-blue-950"],
+html[data-page^="17 "] main > div[class*="bg-slate-900"] > div[class*="bg-slate-800/20"] {
+  background: #fff !important;
+  border-color: #e5e7eb !important;
+  box-shadow: 0 4px 14px rgb(15 23 42 / .06) !important;
+}
+
+html[data-page^="17 "] main > div[class*="bg-slate-900"] [class*="text-slate-100"],
+html[data-page^="17 "] main > div[class*="bg-slate-900"] [class*="text-slate-200"],
+html[data-page^="17 "] main > div[class*="bg-slate-900"] [class*="text-slate-300"] {
+  color: #1f2937 !important;
+}
+
+html[data-page^="18 "] main {
+  color: #111827 !important;
+}
+
+html[data-page^="18 "] main [data-purpose="change-item"],
+html[data-page^="18 "] main [data-purpose="explanation-section"] > div:last-child {
+  background: #fff !important;
+  border-color: #e5e7eb !important;
+  box-shadow: 0 4px 14px rgb(15 23 42 / .06) !important;
+}
+
+html[data-page^="18 "] main [class*="text-white"],
+html[data-page^="18 "] main [class*="text-slate-100"],
+html[data-page^="18 "] main [class*="text-slate-300"] {
+  color: #1f2937 !important;
+}
+
+html[data-page^="18 "] main [class*="text-slate-400"] {
+  color: #64748b !important;
+}
+
+html[data-page^="18 "] header[data-purpose="top-navigation"] h1 {
+  color: #111827 !important;
+}
+
+/* 三个 AI 计划页面的蓝绿文字提高对比度，避免浅色文字融入白色页面。 */
+html[data-page^="08 "] [class*="text-cyan-"],
+html[data-page^="17 "] [class*="text-cyan-"],
+html[data-page^="18 "] [class*="text-cyan-"] {
+  color: #0369a1 !important;
+}
+html[data-page^="08 "] [class*="text-emerald-"],
+html[data-page^="17 "] [class*="text-emerald-"],
+html[data-page^="18 "] [class*="text-emerald-"] {
+  color: #047857 !important;
+}
+
+/* 两个后续计划页按建档页规格固定为单屏移动端画布，避免外层高度造成内容截断。 */
+html[data-page^="17 "] body > div,
+html[data-page^="18 "] body > div {
+  width: min(100vw, 428px) !important;
+  max-width: 428px !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+html[data-page^="17 "] body > div {
+  padding: 12px 16px 12px !important;
+}
+
+html[data-page^="17 "] header.fixed,
+html[data-page^="18 "] header[data-purpose="top-navigation"] {
+  height: 50px !important;
+  min-height: 50px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+html[data-page^="18 "] body > div {
+  padding-bottom: 12px !important;
+}
+
+/* 对比页按钮与 AI 调整页保持同一纵向位置，并按要求只露出下半部分。 */
+html[data-page^="18 "] [data-purpose="bottom-cta"] {
+  position: relative !important;
+  top: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
+  margin-top: 12px !important;
+  padding: 0 0 8px !important;
+}
+
+/* AI 计划生成页去掉顶部空白，让返回栏与建档页一样从页面顶部开始。 */
+html[data-page^="08 "] body > div {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+html[data-page^="08 "] body > div.pt-14 {
+  padding-top: 12px !important;
+}
+
+html[data-page^="08 "] body,
+html[data-page^="08 "] body > div {
+  overflow-x: hidden !important;
+}
+
+/* AI 生成页与 AI 调整页的底部按钮上移，避免按钮及说明文字被视口裁切。 */
+html[data-page^="08 "] footer,
+html[data-page^="17 "] footer {
+  transform: translateY(-28px) !important;
+}
+
+html[data-page^="08 "] header {
+  height: 50px !important;
+}
+
+/* 所有带左上角返回符号的页面统一使用建档第二页的相对位置。 */
+html[data-page^="02 "] header,
+html[data-page^="03 "] header,
+html[data-page^="04 "] header,
+html[data-page^="05 "] header,
+html[data-page^="06 "] header,
+html[data-page^="07 "] header,
+html[data-page^="08 "] header,
+html[data-page^="10 "] header,
+html[data-page^="17 "] header,
+html[data-page^="18 "] header {
+  position: relative !important;
+}
+
+/* AI 计划相关页面的返回键与建档第二页保持同样的尺寸和相对位置。 */
+html[data-page^="08 "] header button[aria-label*="返回"],
+html[data-page^="17 "] header button[aria-label*="返回"],
+html[data-page^="18 "] header[data-purpose="top-navigation"] > button:first-child {
+  position: absolute !important;
+  left: 12px !important;
+  top: 8px !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+html[data-page^="08 "] header button[aria-label*="返回"] .material-symbols-outlined,
+html[data-page^="17 "] header button[aria-label*="返回"] .material-symbols-outlined {
+  font-size: 24px !important;
+}
+
+html[data-page^="18 "] header[data-purpose="top-navigation"] > button:first-child svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+/* 计划总览页标题在顶部导航中水平居中。 */
+html[data-page^="10 "] header > div > span {
+  position: absolute !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  white-space: nowrap;
+}
+
+/* 训练计划页的“查看计划调整”固定在右上角。 */
+html[data-page^="09 "] .plan-header .adjust-link {
+  position: absolute !important;
+  left: auto !important;
+  right: 18px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* 训练计划页蓝框内的整体内容下移一点。 */
+html[data-page^="09 "] .hero-content {
+  bottom: 10px !important;
+}
+
+/* 训练计划页主按钮中的播放符号与文字垂直对齐。 */
+html[data-page^="09 "] .primary-action .material-symbols-outlined {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  transform: translateY(1px);
+}
+
+/* 建档第二页基准页的旧版垂直修正必须在统一规则之后清除。 */
+html[data-page^="03 "] header[data-purpose="top-navigation"] > button {
+  top: 8px !important;
+  transform: none !important;
+}
+
+/* 建档第二页原有的垂直修正只用于旧版布局，这里恢复统一基准位置。 */
+html[data-page^="03 "] header[data-purpose="top-navigation"] > button {
+  top: 8px !important;
+  transform: none !important;
+}
+
+html[data-page^="02 "] header button[aria-label*="返回"],
+html[data-page^="03 "] header button[aria-label*="返回"],
+html[data-page^="04 "] header button[aria-label*="返回"],
+html[data-page^="05 "] header button[aria-label*="返回"],
+html[data-page^="06 "] header button[aria-label*="返回"],
+html[data-page^="07 "] header button[aria-label*="返回"],
+html[data-page^="08 "] header button[aria-label*="返回"],
+html[data-page^="10 "] header button[aria-label*="返回"],
+html[data-page^="17 "] header button[aria-label*="返回"],
+html[data-page^="18 "] header[data-purpose="top-navigation"] > button:first-child {
+  position: absolute !important;
+  left: 12px !important;
+  top: 8px !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 !important;
+  transform: none !important;
+  z-index: 10 !important;
+}
+:root {
+  --page15-redesign: 1;
+  --mobile-gutter: 20px;
+  --mobile-width: 428px;
+  --mobile-height: 926px;
+}
+
+/* 热身/拉伸页最终首屏布局：不滚动，图片完整缩放到展示框内。 */
+html[data-page^="12 "],
+html[data-page^="14 "] {
+  overflow: hidden !important;
+}
+html[data-page^="12 "] body,
+html[data-page^="14 "] body {
+  height: 100dvh !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  overflow-y: hidden !important;
+}
+html[data-page^="12 "] main,
+html[data-page^="14 "] main {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+html[data-page^="12 "] main section .aspect-\[16\/10\],
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin > div.flex.flex-col.gap-4 > div.rounded-xl > div.relative.w-full.h-40 {
+  height: 160px !important;
+  aspect-ratio: auto !important;
+
+/* 完成训练页重新设计。 */
+html[data-page^="15 "] { background: #faf8fe !important; overflow: hidden !important; }
+html[data-page^="15 "] body,
+html[data-page^="15 "] main { height: 100dvh !important; min-height: 0 !important; overflow: hidden !important; background: #fff !important; }
+html[data-page^="15 "] main > div {
+  width: 100% !important; max-width: 428px !important; min-height: 100dvh !important;
+  box-sizing: border-box !important; padding: 72px 24px 36px !important; gap: 28px !important;
+  justify-content: center !important; align-items: center !important;
+}
+html[data-page^="15 "] main > div > section:first-of-type { width: 100% !important; margin: 0 !important; gap: 22px !important; align-items: center !important; }
+html[data-page^="15 "] main > div > section:first-of-type > div.relative { width: 116px !important; height: 116px !important; margin: 0 !important; }
+html[data-page^="15 "] main > div > section:first-of-type > div.relative > div.relative { width: 92px !important; height: 92px !important; }
+html[data-page^="15 "] main > div > section:first-of-type svg.w-10 { width: 56px !important; height: 56px !important; }
+html[data-page^="15 "] main > div > section:first-of-type h1 { font-size: 32px !important; line-height: 1.25 !important; text-align: center !important; white-space: nowrap !important; }
+html[data-page^="15 "] main > div > section:nth-of-type(2) { display:flex !important; flex-direction:column !important; aspect-ratio:auto !important; }
+html[data-page^="15 "] main > div > section:nth-of-type(3) { width: 100% !important; gap: 14px !important; margin: 0 !important; align-items: center !important; }
+html[data-page^="15 "] main > div > section:nth-of-type(3) button { width: 100% !important; }
+}
+
+/* 完成训练页全新单屏布局：白底、居中运动图标、清晰的双按钮操作。 */
+html[data-page^="15 "] {
+  background: #faf8fe !important;
+  overflow: hidden !important;
+}
+html[data-page^="15 "] body,
+html[data-page^="15 "] main {
+  width: 100% !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  background: #fff !important;
+}
+html[data-page^="15 "] main > div {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 428px !important;
+  min-height: 100dvh !important;
+  padding: 72px 24px 36px !important;
+  gap: 28px !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+html[data-page^="15 "] main > div > section:first-of-type {
+  width: 100% !important;
+  margin: 0 !important;
+  gap: 22px !important;
+  align-items: center !important;
+}
+html[data-page^="15 "] main > div > section:first-of-type > div.relative {
+  width: 116px !important;
+  height: 116px !important;
+  margin: 0 !important;
+}
+html[data-page^="15 "] main > div > section:first-of-type > div.relative > div.relative {
+  width: 92px !important;
+  height: 92px !important;
+}
+html[data-page^="15 "] main > div > section:first-of-type svg.w-10 {
+  width: 56px !important;
+  height: 56px !important;
+}
+html[data-page^="15 "] main > div > section:first-of-type h1 {
+  font-size: 32px !important;
+  line-height: 1.25 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+html[data-page^="15 "] main > div > section:nth-of-type(2) {
+  display: flex !important;
+  flex-direction: column !important;
+  aspect-ratio: auto !important;
+}
+html[data-page^="15 "] main > div > section:nth-of-type(3) {
+  width: 100% !important;
+  gap: 14px !important;
+  margin: 0 !important;
+  align-items: center !important;
+}
+html[data-page^="15 "] main > div > section:nth-of-type(3) button {
+  width: 100% !important;
+}
+
+/* 拉伸页顶部红框区域不保留按钮、分隔线或阴影。 */
+html[data-page^="14 "] header {
+  box-shadow: none !important;
+  border-bottom: 0 !important;
+}
+html[data-page^="14 "] header > div {
+  box-shadow: none !important;
+  border-bottom: 0 !important;
+}
+
+/* 拉伸页顶部红框区域不保留按钮、分隔线或阴影。 */
+html[data-page^="14 "] header {
+  box-shadow: none !important;
+  border-bottom: 0 !important;
+}
+html[data-page^="14 "] header > div {
+  box-shadow: none !important;
+  border-bottom: 0 !important;
+}
+
+html[data-page^="14 "] header {
+  box-shadow: none !important;
+  border-bottom: 0 !important;
+}
+html[data-page^="14 "] header > div {
+  box-shadow: none !important;
+  border-bottom: 0 !important;
+}
+
+html {
+  width: min(100vw, var(--mobile-width)) !important;
+  min-width: 320px;
+  max-width: var(--mobile-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  box-sizing: border-box;
+}
+
+body {
+  width: min(100vw, var(--mobile-width)) !important;
+  min-width: 320px;
+  max-width: var(--mobile-width) !important;
+  min-height: 100dvh;
+  margin: 0 auto !important;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+html[data-page="01 登录与注册.html"] body,
+html[data-page="01 登录与注册.html"] body > main {
+  width: min(100vw, var(--mobile-width)) !important;
+  max-width: var(--mobile-width) !important;
+  min-height: var(--mobile-height) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+}
+
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* 所有可交互控件统一提供轻量的鼠标悬停反馈；移动端不会产生粘滞 hover。 */
+button:not(:disabled),
+a[href],
+[role="button"] {
+  cursor: pointer;
+  transition: filter .16s ease, opacity .16s ease, box-shadow .16s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled):hover,
+  a[href]:hover,
+  [role="button"]:hover {
+    filter: brightness(.96);
+  }
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+button, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input, select, textarea {
+  max-width: 100%;
+  font: inherit;
+}
+
+/* Keep cards and horizontal controls inside a phone viewport. */
+main, header, footer, nav, section, article {
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  /* Every screen uses the same 428 x 926 mobile viewport on desktop previews. */
+  html {
+    width: var(--mobile-width) !important;
+    height: var(--mobile-height) !important;
+    min-height: var(--mobile-height) !important;
+    margin: 0 auto !important;
+    overflow: hidden;
+  }
+
+  body {
+    position: relative;
+    width: var(--mobile-width) !important;
+    max-width: var(--mobile-width) !important;
+    height: var(--mobile-height) !important;
+    min-height: var(--mobile-height) !important;
+    margin: 0 auto !important;
+    background: var(--mobile-shell-background, #f7f8fb);
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, .06), 0 18px 60px rgba(15, 23, 42, .12);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  body > .fixed,
+  body > header.fixed,
+  body > nav.fixed,
+  body > footer.fixed {
+    position: absolute !important;
+  }
+}
+
+/* All product screens are single-screen app views. Only the full plan list
+   is intentionally scrollable. */
+html[data-page]:not([data-page="10 计划总览页.html"]),
+html[data-page]:not([data-page="10 计划总览页.html"]) body {
+  overflow: hidden !important;
+}
+
+html[data-page="10 计划总览页.html"],
+html[data-page="10 计划总览页.html"] body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+html[data-page]:not([data-page="10 计划总览页.html"]) body {
+  height: min(100dvh, var(--mobile-height));
+  min-height: min(100dvh, var(--mobile-height));
+}
+
+html[data-page="09 计划页.html"] .plan-page,
+html[data-page="13 跑步页.html"] body {
+  height: 100%;
+  min-height: 100%;
+}
+
+@media (max-width: 380px) {
+  :root { --mobile-gutter: 16px; }
+  body { font-size: 15px; }
+}
+
+/* Desktop preview alignment for the app screens. The plan and running screens
+   keep their own full-bleed treatment. */
+@media (min-width: 768px) {
+  html[data-page]:not([data-page="09 计划页.html"]):not([data-page="13 跑步页.html"]) body {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+/* Shared rhythm for the five profile setup screens. */
+html[data-page^="02 "],
+html[data-page^="03 "],
+html[data-page^="04 "],
+html[data-page^="05 "],
+html[data-page^="06 "] {
+  background: #faf8fe;
+}
+
+html[data-page^="02 "] body,
+html[data-page^="03 "] body,
+html[data-page^="04 "] body,
+html[data-page^="05 "] body,
+html[data-page^="06 "] body {
+  min-height: 100dvh;
+  background: #faf8fe;
+}
+
+html[data-page^="02 "] main,
+html[data-page^="03 "] main,
+html[data-page^="04 "] main,
+html[data-page^="05 "] main,
+html[data-page^="06 "] main,
+html[data-page^="07 "] main {
+  width: 100%;
+  max-width: 428px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+html[data-page^="02 "] footer,
+html[data-page^="03 "] footer,
+html[data-page^="04 "] footer,
+html[data-page^="05 "] footer,
+html[data-page^="06 "] footer,
+html[data-page^="07 "] footer {
+  width: 100%;
+  max-width: 428px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 建档页统一以建档二为几何基准：标题、白卡和按钮共享同一条左右边线。 */
+html[data-page^="02 "] main,
+html[data-page^="03 "] main,
+html[data-page^="04 "] main,
+html[data-page^="05 "] main,
+html[data-page^="06 "] main,
+html[data-page^="07 "] main {
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  box-sizing: border-box;
+}
+
+html[data-page^="02 "] main > *,
+html[data-page^="03 "] main > *,
+html[data-page^="04 "] main > *,
+html[data-page^="05 "] main > *,
+html[data-page^="06 "] main > *,
+html[data-page^="07 "] main > * {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+html[data-page^="02 "] footer,
+html[data-page^="03 "] footer,
+html[data-page^="04 "] footer,
+html[data-page^="05 "] footer,
+html[data-page^="06 "] footer,
+html[data-page^="07 "] footer,
+html[data-page^="02 "] .zc-profile-action {
+  left: 50% !important;
+  right: auto !important;
+  width: min(100vw, 428px) !important;
+  max-width: 428px !important;
+  transform: translateX(-50%);
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+html[data-page^="02 "] .zc-profile-action,
+html[data-page^="03 "] footer,
+html[data-page^="04 "] footer,
+html[data-page^="05 "] footer,
+html[data-page^="06 "] footer,
+html[data-page^="07 "] footer {
+  position: fixed !important;
+  bottom: 0 !important;
+  z-index: 40;
+  padding: 12px 20px calc(18px + env(safe-area-inset-bottom)) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-page^="02 "] main,
+html[data-page^="03 "] main,
+html[data-page^="04 "] main,
+html[data-page^="05 "] main,
+html[data-page^="06 "] main,
+html[data-page^="07 "] main {
+  padding-bottom: 112px !important;
+}
+
+/* 建档一与建档五使用 div 作为操作栏，补齐与建档二 footer 相同的定位。 */
+html[data-page^="02 "] main > .fixed.bottom-0.zc-profile-action,
+html[data-page^="06 "] main > div.flex.flex-col > div.mt-8 {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: 0 !important;
+  width: min(100vw, 428px) !important;
+  max-width: 428px !important;
+  transform: translateX(-50%) !important;
+  z-index: 40 !important;
+  margin: 0 !important;
+  padding: 12px 20px calc(18px + env(safe-area-inset-bottom)) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-page^="03 "] main,
+html[data-page^="04 "] main,
+html[data-page^="05 "] main,
+html[data-page^="06 "] main {
+  justify-content: center !important;
+  padding-top: 24px;
+  padding-bottom: 96px;
+}
+
+html[data-page^="03 "] main > *,
+html[data-page^="04 "] main > *,
+html[data-page^="05 "] main > *,
+html[data-page^="06 "] main > * {
+  width: 100%;
+}
+
+html[data-page^="03 "] footer button,
+html[data-page^="04 "] footer button,
+html[data-page^="05 "] footer button,
+html[data-page^="06 "] footer button {
+  min-height: 52px;
+}
+
+/* Keep the profile action visible inside the same mobile viewport. */
+html[data-page^="03 "] footer,
+html[data-page^="04 "] footer,
+html[data-page^="05 "] footer {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: 0 !important;
+  z-index: 40;
+  width: min(100vw, var(--mobile-width)) !important;
+  max-width: var(--mobile-width) !important;
+  transform: translateX(-50%);
+  margin: 0 !important;
+  padding: 12px 20px calc(18px + env(safe-area-inset-bottom)) !important;
+  background: transparent;
+  border-top: 0 !important;
+  backdrop-filter: none;
+}
+
+html[data-page^="03 "] header[data-purpose="top-navigation"],
+html[data-page^="04 "] header[data-purpose="top-navigation"],
+html[data-page^="02 "] header,
+html[data-page^="06 "] header,
+html[data-page^="05 "] header[data-purpose="header-navigation"] {
+  position: relative !important;
+}
+
+html[data-page^="03 "] header[data-purpose="top-navigation"] > [data-purpose="step-indicators"],
+html[data-page^="04 "] header[data-purpose="top-navigation"] > [data-purpose="progress-bars"],
+html[data-page^="05 "] header[data-purpose="header-navigation"] [data-purpose="stepper-indicator"],
+html[data-page^="02 "] header > div.flex.items-center.gap-1\.5.flex-1,
+html[data-page^="06 "] header > div > div.flex.items-center.gap-1\.5.flex-1 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Profile page 1 uses a nested header row. Keep its stepper centered after
+   the brand block is removed, and remove the leftover header separator. */
+html[data-page^="02 "] header {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  backdrop-filter: none !important;
+}
+
+html[data-page^="02 "] header > div > div.flex.items-center.gap-1\.5.flex-1 {
+  position: absolute !important;
+  top: 26px;
+  left: 50% !important;
+  width: 140px;
+  max-width: 140px;
+  margin: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+/* 建档第二页返回键与统一基准位置保持一致。 */
+html[data-page^="03 "] header[data-purpose="top-navigation"] > button {
+  top: 8px !important;
+  transform: none !important;
+}
+
+html[data-page^="03 "] main,
+html[data-page^="04 "] main,
+html[data-page^="05 "] main {
+  padding-bottom: 112px !important;
+}
+
+html[data-page^="02 "] header,
+html[data-page^="03 "] header,
+html[data-page^="04 "] header,
+html[data-page^="05 "] header,
+html[data-page^="06 "] header {
+  width: 100%;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Page 1 keeps the original controls and fixed bottom action. */
+
+/* Use the current onboarding cards as the shared frame. */
+html[data-page^="04 "] section[data-purpose="input-card"],
+html[data-page^="05 "] section[data-purpose="metric-stepper-card"],
+html[data-page^="06 "] main div.bg-surface-container-lowest.rounded-3xl,
+html[data-page^="07 "] [data-purpose="metrics-summary"] {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 410px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding: 24px !important;
+  border-radius: 24px !important;
+  box-sizing: border-box;
+}
+
+/* 建档三：与建档二的白卡使用同一外框高度与位置。 */
+html[data-page^="03 "] [data-purpose="target-selection-group"] {
+  min-height: 410px !important;
+  flex: 0 0 410px !important;
+  box-sizing: border-box;
+}
+
+/* 建档二内容与建档五的主体位置对齐。 */
+html[data-page^="03 "] main > * {
+  position: relative;
+  top: -56px;
+}
+
+/* 建档三内容与建档五的主体位置对齐。 */
+html[data-page^="04 "] main > * {
+  position: relative;
+  top: 52px;
+}
+
+html[data-page^="04 "] section[data-purpose="input-card"] {
+  flex: 0 0 410px !important;
+}
+
+/* 建档四：标题紧贴白卡上方，避免被 flex 的自动间距推到页面顶部。 */
+html[data-page^="05 "] main[data-purpose="target-setting-view"] {
+  justify-content: flex-start !important;
+  gap: 16px;
+  padding-top: 32px !important;
+}
+
+html[data-page^="05 "] main[data-purpose="target-setting-view"] [data-purpose="title-section"] {
+  margin: 0 !important;
+}
+
+html[data-page^="05 "] section[data-purpose="metric-stepper-card"] {
+  margin: 0 !important;
+  flex: 0 0 410px !important;
+}
+
+/* 建档五：去掉顶部横线并压缩纵向节奏，确保整页在一个手机视口内完成展示。 */
+html[data-page^="06 "] header {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  backdrop-filter: none !important;
+}
+
+html[data-page^="06 "] main {
+  padding-top: 76px !important;
+  padding-bottom: 8px !important;
+}
+
+html[data-page^="06 "] main > div.flex.flex-col {
+  padding-bottom: 0 !important;
+}
+
+html[data-page^="06 "] main > div.flex.flex-col > div.flex.flex-col.gap-2.pt-2.mb-6 {
+  gap: 4px !important;
+  margin-bottom: 12px !important;
+  padding-top: 0 !important;
+}
+
+html[data-page^="06 "] main div.bg-surface-container-lowest.rounded-3xl {
+  min-height: 410px !important;
+  height: 410px !important;
+  padding: 16px !important;
+  gap: 12px !important;
+}
+
+html[data-page^="06 "] #injury-selector-group {
+  gap: 8px !important;
+}
+
+html[data-page^="06 "] .health-item {
+  padding: 12px !important;
+}
+
+html[data-page^="06 "] main div.bg-surface-container-lowest.rounded-3xl > div.pt-4 {
+  padding-top: 8px !important;
+  gap: 8px !important;
+}
+
+html[data-page^="06 "] main > div.flex.flex-col > div.flex.items-center.justify-center {
+  margin-top: 4px !important;
+}
+
+html[data-page^="06 "] main > div.flex.flex-col > div.mt-8 {
+  margin-top: 12px !important;
+  padding-top: 0 !important;
+}
+
+html[data-page^="06 "] main > div.flex.flex-col > div.mt-8 {
+  margin-top: 0 !important;
+  padding-top: 12px !important;
+}
+
+html[data-page^="06 "] .zc-profile-action-five {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: 0 !important;
+  width: min(100vw, 428px) !important;
+  max-width: 428px !important;
+  transform: translateX(-50%) !important;
+  z-index: 40 !important;
+  margin: 0 !important;
+  padding: 12px 20px calc(18px + env(safe-area-inset-bottom)) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* 用户档案确认页：隐藏右上/中间的“跑者档案”标题，并对齐建档二白卡。 */
+html[data-page^="07 "] body {
+  background: #faf8fe !important;
+}
+
+html[data-page^="07 "] body > div {
+  width: 100% !important;
+  max-width: 428px !important;
+  min-height: 100dvh !important;
+  background: #faf8fe !important;
+}
+
+html[data-page^="07 "] header {
+  background: #fff !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  height: 50px !important;
+  padding: 0 20px !important;
+}
+
+html[data-page^="07 "] main {
+  padding: 48px 20px 24px !important;
+  justify-content: flex-start !important;
+}
+
+html[data-page^="07 "] [data-purpose="hero-title"] {
+  margin-bottom: 16px !important;
+}
+
+html[data-page^="07 "] [data-purpose="metrics-summary"] {
+  margin: 0 !important;
+  flex: 0 0 410px !important;
+  min-height: 410px !important;
+  padding: 24px !important;
+  box-sizing: border-box;
+}
+
+/* AI 计划生成页只切换底色，保留原有动画、间距和内容结构。 */
+html[data-page^="08 "] body,
+html[data-page^="08 "] body > div {
+  background: #fff !important;
+}
+
+html[data-page^="08 "] header {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-page^="08 "] body > div {
+  color: #1d1d1f;
+}
+
+html[data-page^="08 "] .text-white {
+  color: #1d1d1f !important;
+}
+
+/* 五个建档页统一五段进度条：同宽、同高、同间距、同一水平中心线。 */
+html[data-page^="02 "] header > div > div.flex.items-center.gap-1\.5.flex-1,
+html[data-page^="03 "] [data-purpose="step-indicators"],
+html[data-page^="04 "] [data-purpose="progress-bars"],
+html[data-page^="05 "] [data-purpose="stepper-indicator"],
+html[data-page^="06 "] header > div > div.flex.items-center.gap-1\.5.flex-1 {
+  position: absolute !important;
+  top: 26px !important;
+  left: 50% !important;
+  width: 150px !important;
+  max-width: 150px !important;
+  height: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+html[data-page^="02 "] header > div > div.flex.items-center.gap-1\.5.flex-1 > *,
+html[data-page^="03 "] [data-purpose="step-indicators"] > *,
+html[data-page^="04 "] [data-purpose="progress-bars"] > *,
+html[data-page^="05 "] [data-purpose="stepper-indicator"] > *,
+html[data-page^="06 "] header > div > div.flex.items-center.gap-1\.5.flex-1 > * {
+  width: auto !important;
+  min-width: 0 !important;
+  flex: 1 1 0 !important;
+  height: 4px !important;
+  border-radius: 999px !important;
+}
+
+/* 训练相关页面统一使用计划页的底部主导航样式。 */
+html[data-page^="09 "] .zc-bottom-nav,
+html[data-page^="11 "] .zc-bottom-nav,
+html[data-page^="12 "] .zc-bottom-nav,
+html[data-page^="14 "] .zc-bottom-nav,
+html[data-page^="14 "] nav.fixed.bottom-0 {
+  height: calc(84px + env(safe-area-inset-bottom));
+  padding: 7px 22px env(safe-area-inset-bottom);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  background: #fff;
+  color: #91a1b9;
+  border-top: 1px solid #edf1f6;
+  box-shadow: 0 -2px 10px rgba(0,0,0,.03);
+}
+html[data-page^="11 "] .zc-bottom-nav-inner {
+  width: 100%;
+  max-width: 428px;
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+html[data-page^="09 "] .zc-bottom-nav .plan-tab,
+html[data-page^="11 "] .zc-bottom-nav .zc-bottom-tab,
+html[data-page^="12 "] .zc-bottom-nav .zc-bottom-tab,
+html[data-page^="14 "] .zc-bottom-nav .zc-bottom-tab,
+html[data-page^="14 "] nav.fixed.bottom-0 > a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+}
+html[data-page^="09 "] .zc-bottom-nav .plan-tab .material-symbols-outlined,
+html[data-page^="11 "] .zc-bottom-nav .zc-bottom-tab .material-symbols-outlined,
+html[data-page^="12 "] .zc-bottom-nav .zc-bottom-tab .material-symbols-outlined,
+html[data-page^="14 "] .zc-bottom-nav .zc-bottom-tab .material-symbols-outlined,
+html[data-page^="14 "] nav.fixed.bottom-0 > a .material-symbols-outlined {
+  font-size: 25px;
+}
+html[data-page^="09 "] .zc-bottom-nav .plan-tab.active,
+html[data-page^="11 "] .zc-bottom-nav .zc-bottom-tab.active,
+html[data-page^="12 "] .zc-bottom-nav .zc-bottom-tab.active,
+html[data-page^="14 "] .zc-bottom-nav .zc-bottom-tab.active,
+html[data-page^="14 "] nav.fixed.bottom-0 > a:first-child {
+  color: #087df5;
+  font-weight: 700;
+}
+
+/* 训练计划页的页面背景延伸到其底部导航栏。 */
+html[data-page^="09 "] .plan-tabs {
+  background: transparent !important;
+  border-top-color: rgba(255,255,255,.12) !important;
+}
+
+/* 后续页面的固定顶部栏、底部栏和吸底操作栏限制在移动端画布内，
+   与外部浅紫色画布形成清晰分隔。 */
+html[data-page^="10 "] header.fixed,
+html[data-page^="11 "] header.fixed,
+html[data-page^="11 "] nav.fixed,
+html[data-page^="14 "] header.fixed,
+html[data-page^="14 "] nav.fixed,
+html[data-page^="14 "] main > div.fixed,
+html[data-page^="16 "] header.fixed,
+html[data-page^="17 "] header.fixed {
+  left: 50% !important;
+  right: auto !important;
+  width: min(100vw, var(--mobile-width)) !important;
+  max-width: var(--mobile-width) !important;
+  transform: translateX(-50%) !important;
+}
+
+/* 热身/拉伸页与前面页面保持白色内容区，外部画布仍保留浅紫色。 */
+html[data-page^="12 "] body,
+html[data-page^="12 "] main,
+html[data-page^="12 "] header,
+html[data-page^="14 "] body,
+html[data-page^="14 "] main,
+html[data-page^="14 "] header {
+  background: #fff !important;
+}
+
+/* 与训练页保持同样的 428px 移动端页面宽度和顶部栏规格。 */
+html[data-page^="14 "] body {
+  width: min(100%, var(--mobile-width)) !important;
+  max-width: var(--mobile-width) !important;
+  margin: 0 auto !important;
+}
+html[data-page^="12 "] header,
+html[data-page^="14 "] header {
+  height: 56px !important;
+  background: rgb(255 255 255 / 0.95) !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 两个动作时压缩内容高度，保证按钮与底部导航在首屏内可见。 */
+html[data-page^="12 "] main {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  gap: 8px !important;
+}
+html[data-page^="12 "] main > div.flex.flex-col.gap-4 {
+  gap: 8px !important;
+}
+html[data-page^="12 "] main section {
+  padding: 10px !important;
+  gap: 8px !important;
+}
+html[data-page^="12 "] main section .aspect-\[16\/10\] {
+  aspect-ratio: auto !important;
+  height: 136px !important;
+}
+html[data-page^="12 "] main > div:last-child {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* 拉伸页底部按钮改为与热身页一致的普通蓝色 CTA，不遮挡卡片内容。 */
+html[data-page^="14 "] main div.fixed.inset-x-0 {
+  position: static !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  transform: none !important;
+  padding: 0 20px 8px !important;
+  background: transparent !important;
+  border: 0 !important;
+  backdrop-filter: none !important;
+}
+html[data-page^="14 "] main div.fixed.inset-x-0 button {
+  height: 52px !important;
+  border-radius: 999px !important;
+  background: #0058bc !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgb(0 113 227 / 0.22) !important;
+}
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin {
+  padding-bottom: 8px !important;
+}
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin > div.flex.flex-col.gap-4 {
+  gap: 8px !important;
+}
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin > div.flex.flex-col.gap-4 > div.rounded-xl {
+  padding: 12px !important;
+  gap: 8px !important;
+}
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin > div.flex.flex-col.gap-4 > div.rounded-xl > div.relative.w-full.h-40 {
+  height: 136px !important;
+}
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin {
+  padding-top: 8px !important;
+}
+
+@media (max-height: 720px) {
+  html[data-page^="12 "] body,
+  html[data-page^="14 "] body {
+    overflow: hidden !important;
+  }
+  html[data-page^="12 "] nav.zc-bottom-nav,
+  html[data-page^="14 "] nav.fixed {
+    height: 68px !important;
+  }
+  html[data-page^="12 "] nav.zc-bottom-nav {
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: 0 !important;
+    width: min(100vw, var(--mobile-width)) !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+/* 热身页与拉伸页不使用底部导航，释放空间给动作内容。 */
+html[data-page^="12 "] nav.zc-bottom-nav,
+html[data-page^="14 "] nav.fixed {
+  display: none !important;
+}
+html[data-page^="12 "] body,
+html[data-page^="14 "] body {
+  overflow: hidden !important;
+}
+html[data-page^="12 "] main {
+  min-height: calc(100dvh - 56px) !important;
+  padding-bottom: 16px !important;
+}
+html[data-page^="12 "] main section .aspect-\[16\/10\],
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin > div.flex.flex-col.gap-4 > div.rounded-xl > div.relative.w-full.h-40 {
+  height: 160px !important;
+}
+html[data-page^="12 "] main section,
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin > div.flex.flex-col.gap-4 > div.rounded-xl {
+  gap: 10px !important;
+}
+html[data-page^="12 "] main > div.flex.flex-col.gap-4,
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin > div.flex.flex-col.gap-4 {
+  gap: 12px !important;
+}
+html[data-page^="14 "] main > div.fixed.inset-x-0,
+html[data-page^="14 "] main div.fixed.inset-x-0 {
+  padding-bottom: 16px !important;
+}
+
+/* 动作图按原图比例完整展示，避免 cover 裁掉人物和动作；按钮随两张卡片自然下移。 */
+html[data-page^="12 "] body,
+html[data-page^="14 "] body {
+  overflow-y: auto !important;
+  height: auto !important;
+  min-height: 100dvh !important;
+}
+html[data-page^="12 "],
+html[data-page^="14 "] {
+  height: auto !important;
+  overflow-y: auto !important;
+}
+html[data-page^="12 "] main,
+html[data-page^="14 "] main {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+html[data-page^="12 "] main section .aspect-\[16\/10\],
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin > div.flex.flex-col.gap-4 > div.rounded-xl > div.relative.w-full.h-40 {
+  height: auto !important;
+  aspect-ratio: 512 / 279 !important;
+}
+html[data-page^="12 "] main section .aspect-\[16\/10\] img,
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin > div.flex.flex-col.gap-4 > div.rounded-xl > div.relative.w-full.h-40 img {
+  object-fit: contain !important;
+  background: #f1f5f9 !important;
+}
+html[data-page^="12 "] main > div:last-child,
+html[data-page^="14 "] main div.fixed.inset-x-0 {
+  margin-top: 4px !important;
+  padding-bottom: 24px !important;
+}
+html[data-page^="14 "] main div.fixed.inset-x-0 {
+  margin-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+html[data-page^="14 "] header > div > div.w-10.flex.justify-end,
+html[data-page^="14 "] header > div > div.w-10.flex.justify-end button {
+  display: none !important;
+}
+html[data-page^="14 "] header > div > button[aria-label="返回"] {
+  display: none !important;
+}
+html[data-page^="14 "] header,
+html[data-page^="14 "] header > div {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+/* 拉伸页动作默认未完成，勾选后的蓝色状态与热身页一致。 */
+html[data-page^="14 "] main .bg-secondary-fixed {
+  background: transparent !important;
+  border: 2px solid #cbd5e1 !important;
+  color: transparent !important;
+}
+html[data-page^="14 "] main .absolute.bottom-2.right-2 {
+  display: none !important;
+}
+
+/* 完成训练页：白色背景、移除空灰色面板，内容和完成图标居中。 */
+html[data-page^="15 "] body,
+html[data-page^="15 "] main {
+  background: #fff !important;
+}
+html[data-page^="15 "] main > div {
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+html[data-page^="15 "] main > div > section:nth-of-type(2) {
+  display: flex !important;
+  flex-direction: column !important;
+  aspect-ratio: auto !important;
+}
+html[data-page^="15 "] main > div > section:nth-of-type(3) {
+  align-items: center !important;
+  text-align: center !important;
+}
+
+html[data-page^="10 "] header.fixed,
+html[data-page^="11 "] header.fixed,
+html[data-page^="16 "] header.fixed,
+html[data-page^="17 "] header.fixed {
+  box-shadow: none !important;
+}
+
+html[data-page^="14 "] header.fixed {
+  box-shadow: none !important;
+  border-bottom: 0 !important;
+}
+
+/* 训练页顶部标题栏与内容之间不显示分隔线。 */
+html[data-page^="11 "] header.fixed {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 头像核心中的品牌字样保持原来的白色，其它生成页内容不变。 */
+html[data-page^="08 "] .text-\[12px\].font-bold.text-white {
+  color: #fff !important;
+}
+
+/* 所有页面外部画布使用统一的浅紫色，页面内部背景保持各自设计。 */
+html[data-page] {
+  background: #faf8fe !important;
+}
+
+/* 登录页与建档页的页面内容使用白色，外部画布保持浅紫色。 */
+html[data-page^="01 "] body,
+html[data-page^="02 "] body,
+html[data-page^="03 "] body,
+html[data-page^="04 "] body,
+html[data-page^="05 "] body,
+html[data-page^="06 "] body,
+html[data-page^="07 "] body,
+html[data-page^="02 "] main,
+html[data-page^="03 "] main,
+html[data-page^="04 "] main,
+html[data-page^="05 "] main,
+html[data-page^="06 "] main,
+html[data-page^="07 "] main {
+  background: #fff !important;
+}
+
+/* Remove the native number input spinner marked in the reference capture. */
+html[data-page^="04 "] input[type="number"]::-webkit-inner-spin-button,
+html[data-page^="04 "] input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+html[data-page^="04 "] input[type="number"] {
+  appearance: textfield;
+}
+
+/* 只有计划总览、练前热身和练后拉伸页面允许纵向滚动。 */
+html[data-page][data-page^="10 "] body,
+html[data-page][data-page^="12 "] body,
+html[data-page][data-page^="14 "] body {
+  height: auto !important;
+  min-height: 100dvh !important;
+  overflow-y: auto !important;
+}
+
+/* 写训练感受页的三个评估项均使用五个居中的四角芒星。 */
+html[data-page^="16 "] #stars-subjective,
+html[data-page^="16 "] #stars-physical,
+html[data-page^="16 "] #stars-pain {
+  width: 100% !important;
+  justify-content: center !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(3) > .relative {
+  border-color: rgb(100 116 139 / 0.65) !important;
+}
+html[data-page^="16 "] #comment-box {
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+.zc-profile-progress-bar {
+  display: block !important;
+  background: #e4e4e7 !important;
+}
+
+.zc-profile-progress-bar.is-active {
+  background: #18181b !important;
+}
+html[data-page^="06 "] main {
+  justify-content: flex-start !important;
+  padding-top: 78px !important;
+}
+html[data-page^="06 "] main > div.flex.flex-col {
+  max-width: 388px !important;
+  margin: 0 auto !important;
+}
+html[data-page^="06 "] main div.bg-surface-container-lowest.rounded-3xl {
+  width: 100% !important;
+  height: 410px !important;
+  min-height: 410px !important;
+  margin: 0 !important;
+}
+
+html[data-page^="07 "] .zc-profile-edit {
+  flex: none;
+  margin-left: 4px;
+  padding: 4px 0 4px 4px;
+  border: 0;
+  background: transparent;
+  color: #0071e3;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+html[data-page^="07 "] [data-purpose="metrics-summary"] > div > div {
+  min-width: 0;
+}
+html[data-page^="07 "] [data-purpose="metrics-summary"] > div > div > span {
+  text-align: right;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+/* 确认页的跑步基础信息按三行展示，保持类型、数据、勾选和修改整齐对齐。 */
+html[data-page^="07 "] [data-purpose="metrics-summary"] > div:nth-child(3) {
+  flex-wrap: nowrap !important;
+  gap: 8px;
+}
+html[data-page^="07 "] [data-purpose="metrics-summary"] > div:nth-child(3) > span {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-size: 14.5px;
+  line-height: 1.35;
+  padding-top: 0;
+}
+html[data-page^="07 "] [data-purpose="metrics-summary"] > div:nth-child(3) > div {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  column-gap: 6px;
+  align-items: start;
+}
+html[data-page^="07 "] [data-purpose="metrics-summary"] > div:nth-child(3) > div > span:first-child {
+  min-width: 0;
+  overflow: visible;
+  white-space: normal;
+  font-size: 13px;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+html[data-page^="07 "] [data-purpose="metrics-summary"] > div:nth-child(3) .zc-profile-edit {
+  font-size: 12px;
+  padding-left: 4px;
+}
+
+/* 小视口下，除计划总览、练前热身和练后拉伸外，其余后续页面保持单屏完整显示。 */
+@media (max-height: 760px) {
+  html[data-page^="08 "] body > div,
+  html[data-page^="17 "] body > div,
+  html[data-page^="18 "] body > div {
+    zoom: .86;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 116.28vh !important;
+  }
+
+  html[data-page^="08 "] body > div {
+    zoom: .9;
+    width: 100% !important;
+    min-height: 111.12vh !important;
+  }
+  /* 生成页整体缩放时，返回键补偿缩放，保持与建档第二页相同的实际屏幕位置。 */
+  html[data-page^="08 "] body > div header button[aria-label*="返回"] {
+    left: calc(12px / .9 - 16px) !important;
+    top: calc(8px / .9) !important;
+    width: calc(40px / .9) !important;
+    height: calc(40px / .9) !important;
+  }
+  html[data-page^="08 "] main {
+    margin-top: 0 !important;
+    row-gap: 8px !important;
+  }
+  html[data-page^="08 "] main > section {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+  html[data-page^="08 "] main > div.w-full {
+    padding: 8px !important;
+    row-gap: 6px !important;
+  }
+  html[data-page^="08 "] footer {
+    margin-top: 6px !important;
+  }
+
+  html[data-page^="16 "] main > section:first-of-type {
+    gap: 10px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+  html[data-page^="16 "] main > section:first-of-type > div.flex.flex-col.gap-2.pt-1 {
+    gap: 4px !important;
+    padding-top: 0 !important;
+  }
+  html[data-page^="16 "] main > section:first-of-type #stars-subjective,
+  html[data-page^="16 "] main > section:first-of-type #stars-physical,
+  html[data-page^="16 "] main > section:first-of-type #stars-pain {
+    gap: 6px !important;
+  }
+  html[data-page^="16 "] main > section:first-of-type #stars-subjective button,
+  html[data-page^="16 "] main > section:first-of-type #stars-physical button,
+  html[data-page^="16 "] main > section:first-of-type #stars-pain button {
+    padding: 0 !important;
+  }
+  html[data-page^="16 "] main > section:nth-of-type(2),
+  html[data-page^="16 "] main > section:nth-of-type(3) {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+  html[data-page^="16 "] #comment-box {
+    min-height: 64px !important;
+  }
+  html[data-page^="16 "] main > section:nth-of-type(3) .mt-5 {
+    margin-top: 14px !important;
+  }
+}
+
+/* 热身/拉伸页最终首屏布局：不滚动，图片完整缩放到展示框内。 */
+html[data-page^="12 "],
+html[data-page^="14 "] {
+  overflow: hidden !important;
+}
+html[data-page^="12 "] body,
+html[data-page^="14 "] body {
+  height: 100dvh !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+html[data-page^="12 "] main,
+html[data-page^="14 "] main {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+html[data-page^="12 "] main section .aspect-\[16\/10\],
+html[data-page^="14 "] main > div.flex.flex-col.w-full.px-margin > div.flex.flex-col.gap-4 > div.rounded-xl > div.relative.w-full.h-40 {
+  height: 160px !important;
+  aspect-ratio: auto !important;
+}
+/* 完成训练页重新设计：单屏白底、中心图标和双按钮。 */
+html[data-page^="15 "] { background:#faf8fe !important; overflow:hidden !important; }
+html[data-page^="15 "] body, html[data-page^="15 "] main { height:100dvh !important; min-height:0 !important; overflow:hidden !important; background:#fff !important; }
+html[data-page^="15 "] main > div { width:100% !important; max-width:428px !important; min-height:100dvh !important; box-sizing:border-box !important; padding:72px 24px 36px !important; gap:28px !important; justify-content:center !important; align-items:center !important; }
+html[data-page^="15 "] main > div > section:first-of-type { width:100% !important; margin:0 !important; gap:22px !important; align-items:center !important; }
+html[data-page^="15 "] main > div > section:first-of-type > div.relative { width:116px !important; height:116px !important; margin:0 !important; }
+html[data-page^="15 "] main > div > section:first-of-type > div.relative > div.relative { width:92px !important; height:92px !important; }
+html[data-page^="15 "] main > div > section:first-of-type svg.w-10 { width:56px !important; height:56px !important; }
+html[data-page^="15 "] main > div > section:first-of-type h1 { font-size:32px !important; line-height:1.25 !important; text-align:center !important; white-space:nowrap !important; }
+html[data-page^="15 "] main > div > section:nth-of-type(2) { display:flex !important; flex-direction:column !important; aspect-ratio:auto !important; }
+html[data-page^="15 "] main > div > section:nth-of-type(3) { width:100% !important; gap:14px !important; margin:0 !important; align-items:center !important; }
+html[data-page^="15 "] main > div > section:nth-of-type(3) button { width:100% !important; }
+/* 返回键最终统一规则：以建档第二页的页面相对位置为基准。 */
+html[data-page^="02 "] header button[aria-label*="返回"],
+html[data-page^="03 "] header button[aria-label*="返回"],
+html[data-page^="04 "] header button[aria-label*="返回"],
+html[data-page^="05 "] header button[aria-label*="返回"],
+html[data-page^="06 "] header button[aria-label*="返回"],
+html[data-page^="07 "] header button[aria-label*="返回"],
+html[data-page^="08 "] header button[aria-label*="返回"],
+html[data-page^="10 "] header button[aria-label*="返回"],
+html[data-page^="17 "] header button[aria-label*="返回"],
+html[data-page^="18 "] header[data-purpose="top-navigation"] > button:first-child {
+  position: absolute !important;
+  left: 12px !important;
+  top: 8px !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 !important;
+  transform: none !important;
+  z-index: 10 !important;
+}
+
+html[data-page^="02 "] header,
+html[data-page^="03 "] header,
+html[data-page^="04 "] header,
+html[data-page^="05 "] header,
+html[data-page^="06 "] header,
+html[data-page^="07 "] header,
+html[data-page^="08 "] header,
+html[data-page^="10 "] header,
+html[data-page^="17 "] header,
+html[data-page^="18 "] header {
+  position: relative !important;
+}

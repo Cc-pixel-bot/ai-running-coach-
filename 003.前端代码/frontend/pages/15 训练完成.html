@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>训练完成</title>
+  <link rel="stylesheet" href="../assets/mobile.css?v=20261110">
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #fff; }
+    body { font-family: Inter, "Microsoft YaHei", sans-serif; color: #1a1b1f; }
+    #completion-screen { width: min(100%, 428px); min-height: 100dvh; box-sizing: border-box; margin: 0 auto; padding: 72px 24px 36px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 28px; background: #fff; }
+    .completion-heading { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+    .completion-badge { width: 116px; height: 116px; border-radius: 32px; display: flex; align-items: center; justify-content: center; background: linear-gradient(145deg, #d9fff5 0%, #b7eee2 100%); border: 1px solid #8de3d2; box-shadow: 0 12px 30px rgba(0,107,94,.16); transform: rotate(-6deg); }
+    .completion-badge-inner { width: 92px; height: 92px; border-radius: 26px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.32); transform: rotate(6deg); }
+    .completion-heading h1 { margin: 0; font-size: 32px; line-height: 1.25; letter-spacing: -.025em; white-space: nowrap; }
+    .completion-heading p { margin: -4px 0 0; color: #414755; font-size: 17px; line-height: 24px; }
+    .training-summary { width: 100%; box-sizing: border-box; padding: 20px 16px; border-radius: 16px; background: #f4f3f8; box-shadow: 0 2px 8px rgba(15,23,42,.05); }
+    .training-summary-title { margin: 0 0 16px; text-align: center; color: #414755; font-size: 14px; font-weight: 600; }
+    .training-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+    .training-summary-value { margin: 0; color: #1a1b1f; font-size: 30px; line-height: 36px; font-weight: 700; }
+    .training-summary-label { margin: 2px 0 0; color: #717786; font-size: 12px; line-height: 16px; }
+    .completion-actions { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+    .completion-actions button { width: 100%; border: 0; cursor: pointer; font: inherit; }
+    #feedback-step-btn { height: 52px; border-radius: 999px; background: #0058bc; color: #fff; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,88,188,.18); }
+    #return-plan-btn { height: 46px; border-radius: 999px; background: #f4f3f8; color: #414755; font-size: 14px; font-weight: 600; }
+    #feedback-step-btn:active, #return-plan-btn:active { transform: scale(.99); }
+  </style>
+</head>
+<body data-page="complete">
+  <main>
+    <div id="completion-screen">
+      <section class="completion-heading" data-purpose="completion-heading">
+        <div class="completion-badge" aria-hidden="true"><div class="completion-badge-inner">
+          <svg width="62" height="62" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 45.5C21 45.5 22.5 35 30 35C37.5 35 39 24.5 51 18.5" stroke="#006B5E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M42 18.5H51V27.5" stroke="#006B5E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 50.5H50" stroke="#006B5E" stroke-width="3" stroke-linecap="round" opacity=".28"/>
+            <circle cx="13" cy="45.5" r="4" fill="#006B5E"/>
+            <path d="M49 8L50.8 13.2L56 15L50.8 16.8L49 22L47.2 16.8L42 15L47.2 13.2L49 8Z" fill="#0070EB"/>
+          </svg>
+        </div></div>
+        <h1>恭喜你，完成了今天的训练！</h1>
+      </section>
+      <div class="training-summary" data-purpose="training-summary">
+        <p class="training-summary-title">本次训练数据</p>
+        <div class="training-summary-grid">
+          <div><p class="training-summary-value">6.0</p><p class="training-summary-label">公里</p></div>
+          <div><p class="training-summary-value">36</p><p class="training-summary-label">分钟</p></div>
+          <div><p class="training-summary-value">6'00&quot;</p><p class="training-summary-label">平均配速</p></div>
+        </div>
+      </div>
+      <section class="completion-actions" data-purpose="completion-actions">
+        <button id="feedback-step-btn" type="button"><span>填写训练反馈</span></button>
+        <button id="return-plan-btn" type="button">返回训练计划</button>
+      </section>
+    </div>
+  </main>
+  
+<script src="../assets/redesign-app.js" defer></script></body>
+</html>

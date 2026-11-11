@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<title>跑者建档 - 阶段目标选择</title>
+<!-- Tailwind CSS v3 with forms & container-queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: [
+              '-apple-system',
+              'BlinkMacSystemFont',
+              '"SF Pro Display"',
+              '"SF Pro Text"',
+              '"PingFang SC"',
+              '"Hiragino Sans GB"',
+              '"Microsoft YaHei"',
+              'sans-serif'
+            ],
+          },
+          colors: {
+            brand: {
+              black: '#111111',
+              cardBorder: '#EFEFEF',
+              iconBg: '#F3F4F6',
+              subtext: '#8E8E93',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="base-styling">
+    body {
+      -webkit-tap-highlight-color: transparent;
+      letter-spacing: -0.015em;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+<link rel="stylesheet" href="../assets/mobile.css?v=20261111-v8"><style>
+body[data-page="profile-goal"] main { flex: 1 1 0% !important; min-height: 0 !important; justify-content: center !important; gap: 12px !important; padding: 0 20px 96px !important; box-sizing: border-box !important; }
+body[data-page="profile-goal"] [data-purpose="step-header"] { margin: 0 0 0 !important; padding: 0 !important; }
+body[data-page="profile-goal"] [data-purpose="target-selection-group"] { width: 100% !important; margin: 0 !important; }
+body[data-page="profile-goal"] [data-purpose="bottom-bar"] button { background: #18181b !important; cursor: pointer; }
+body[data-page="profile-goal"] [data-purpose="target-selection-group"] [role="radio"][aria-checked="true"] { border-color: #087df5 !important; background: #f5faff !important; }
+body[data-page="profile-goal"] [data-purpose="target-selection-group"] [role="radio"][aria-checked="true"] .check-circle { border-color: #087df5 !important; background: #087df5 !important; }
+</style></head>
+<body class="bg-white text-zinc-900 min-h-screen flex flex-col justify-between antialiased font-sans select-none pb-safe" data-page="profile-goal">
+<!-- BEGIN: TopNavigation -->
+<!-- 顶部导航栏：返回按钮、居中4段分段进度条及右上角进度数字 -->
+<header class="w-full pt-4 pb-2 flex items-center justify-between px-5" data-purpose="top-navigation">
+<!-- 返回按钮 -->
+<button aria-label="返回上一步" class="w-10 h-10 -ml-2 flex items-center justify-center text-zinc-900 active:opacity-40 transition-opacity" type="button">
+<svg class="w-6 h-6 stroke-[2.25] text-zinc-900" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15.75 19.5L8.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- 居中分段进度条 (5段，当前第2段已激活) -->
+<div class="flex items-center space-x-1.5" data-purpose="step-indicators" aria-label="第2页，共5页"><div class="w-6 h-1 rounded-full bg-zinc-900"></div><div class="w-6 h-1 rounded-full bg-zinc-900"></div><div class="w-6 h-1 rounded-full bg-zinc-200"></div><div class="w-6 h-1 rounded-full bg-zinc-200"></div><div class="w-6 h-1 rounded-full bg-zinc-200"></div></div>
+</header>
+<!-- END: TopNavigation -->
+<!-- BEGIN: MainContent -->
+<!-- 核心交互与选项区域 -->
+<main class="flex-1 pt-5 pb-6 flex flex-col justify-center px-5">
+<!-- BEGIN: HeaderInfo -->
+<!-- 智程AI标识与主要标题引导说明 -->
+<section class="mb-3" data-purpose="step-header"><h1 class="text-2xl font-semibold tracking-tight text-zinc-900 mb-1">你想跑向哪里</h1></section>
+<!-- END: HeaderInfo -->
+<!-- BEGIN: OptionList -->
+<!-- 目标选项卡片容器 -->
+<div class="bg-white rounded-3xl border border-zinc-100 shadow-sm w-full space-y-3 p-6" data-purpose="target-selection-group" id="optionsContainer">
+<div aria-checked="false" class="group relative flex items-center justify-between p-4 rounded-2xl bg-white border border-zinc-200 active:scale-[0.99] transition-all cursor-pointer" role="radio" tabindex="0">
+  <div class="flex items-center space-x-3.5"><div class="w-11 h-11 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-800 shrink-0"><svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="m10 8 2 2 3 1m-5-3-2 4-3 2m5-6 3 4-1 5m-5-5 2 3-1 4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3 class="text-base font-semibold text-zinc-900">提升 5 公里</h3><p class="text-sm text-zinc-400 mt-0.5">让每一步都更轻松</p></div></div>
+  <span class="check-circle w-6 h-6 rounded-full border-2 border-zinc-200" aria-hidden="true"></span>
+</div>
+<div aria-checked="false" class="group relative flex items-center justify-between p-4 rounded-2xl bg-white border border-zinc-200 active:scale-[0.99] transition-all cursor-pointer" role="radio" tabindex="0">
+  <div class="flex items-center space-x-3.5"><div class="w-11 h-11 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 shrink-0"><svg class="w-5 h-5 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m7 12 3.2 3.2L17 8.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3 class="text-base font-semibold text-zinc-900">完成 10 公里</h3><p class="text-sm text-zinc-400 mt-0.5">建立稳定的耐力底盘</p></div></div>
+  <span class="check-circle w-6 h-6 rounded-full border-2 border-zinc-200" aria-hidden="true"></span>
+</div>
+<div aria-checked="false" class="group relative flex items-center justify-between p-4 rounded-2xl bg-white border border-zinc-200 active:scale-[0.99] transition-all cursor-pointer" role="radio" tabindex="0">
+  <div class="flex items-center space-x-3.5"><div class="w-11 h-11 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-800 shrink-0"><svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M4 16c2-5 4-7 8-7s6 2 8 7M4 16h16m-11 0 2-3m4 3-2-3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3 class="text-base font-semibold text-zinc-900">挑战半程马拉松</h3><p class="text-sm text-zinc-400 mt-0.5">把长距离变成日常</p></div></div>
+  <span class="check-circle w-6 h-6 rounded-full border-2 border-zinc-200" aria-hidden="true"></span>
+</div>
+<div aria-checked="false" class="group relative flex items-center justify-between p-4 rounded-2xl bg-white border border-zinc-200 active:scale-[0.99] transition-all cursor-pointer" role="radio" tabindex="0">
+  <div class="flex items-center space-x-3.5"><div class="w-11 h-11 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-800 shrink-0"><svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12h18M12 3v18M5.6 5.6l12.8 12.8m0-12.8L5.6 18.4" stroke-linecap="round"/><circle cx="12" cy="12" r="3"/></svg></div><div><h3 class="text-base font-semibold text-zinc-900">挑战全程马拉松</h3><p class="text-sm text-zinc-400 mt-0.5">为更大的目标做准备</p></div></div>
+  <span class="check-circle w-6 h-6 rounded-full border-2 border-zinc-200" aria-hidden="true"></span>
+</div>
+</div>
+<!-- END: OptionList -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomAction -->
+<!-- 底部固定继续操作主按钮 -->
+<footer class="w-full pb-8 pt-3 bg-white px-5" data-purpose="bottom-bar">
+<button aria-label="继续" class="w-full h-14 bg-zinc-900 text-white rounded-full font-semibold flex items-center justify-center text-base active:scale-[0.98] transition-transform shadow-lg shadow-zinc-950/10" type="button" disabled><span class="">继续 <svg class="ml-1 inline-block h-5 w-5 align-[-3px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M4 12h16m-7-7 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+</footer>
+<!-- END: BottomAction -->
+<script src="../assets/redesign-app.js" defer></script></body></html>
+

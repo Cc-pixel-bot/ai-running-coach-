@@ -1,0 +1,185 @@
+<!DOCTYPE html><html class="h-full bg-white" lang="zh-CN" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<meta content="mobile_stack" name="shell-type">
+<title>训练反馈</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#0058bc",
+            "primary-container": "#0070eb",
+            "on-primary": "#ffffff",
+            secondary: "#006b5e",
+            "secondary-container": "#e0f6f2",
+            "on-secondary-container": "#005046",
+            surface: "#ffffff",
+            "surface-dim": "#f5f6f9",
+            "surface-container": "#f3f4f8",
+            "surface-container-high": "#e9ebf2",
+            "on-surface": "#1a1b1f",
+            "on-surface-variant": "#5f6676",
+            outline: "#8a91a0",
+            "outline-variant": "#e1e3eb",
+            star: "#ff9800",
+            "star-dim": "#e0e2eb"
+          },
+          fontFamily: {
+            sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "PingFang SC", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    @layer base {
+      html, body {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+      .pt-safe { padding-top: env(safe-area-inset-top, 20px); }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+<link rel="stylesheet" href="../assets/mobile.css?v=20261110"></head>
+<body class="font-sans antialiased text-on-surface bg-white selection:bg-primary/10" data-page="feedback">
+<!-- 顶部大众点评式极简导航 -->
+<header class="fixed top-0 inset-x-0 z-50 pt-safe bg-white/95 backdrop-blur-md border-b border-outline-variant/60">
+<div class="h-12 px-4 flex items-center justify-between relative"><button aria-label="返回" class="w-9 h-9 -ml-1 flex items-center justify-center text-on-surface active:opacity-60 transition relative z-10" type="button"><span class="material-symbols-outlined text-[22px]">arrow_back_ios_new</span></button><h1 class="text-[17px] font-semibold text-on-surface tracking-tight absolute inset-x-0 text-center pointer-events-none">本次训练反馈</h1><div class="w-9 h-9 -ml-1"></div></div>
+</header>
+<main class="w-full pt-[calc(3rem+env(safe-area-inset-top,20px))] bg-white pb-safe">
+<!-- 顶部被评训练微卡片 (大众点评式被评商户/服务小卡) -->
+<div class="px-4 pt-3.5 pb-2">
+<div class="flex items-center gap-3 p-3 rounded-2xl bg-surface-dim border border-outline-variant/60">
+<div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">directions_run</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="text-[14px] font-semibold text-on-surface truncate">有氧筑底配速跑 · 6.0 km</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary">已完成</span>
+</div>
+
+</div>
+</div>
+</div>
+<!-- 总体综合评价打星区 (大众点评核心大星) -->
+<!-- 快速体感标签 (大众点评特色印象标签) -->
+<!-- 维度细分打分 (类似大众点评: 口味/环境/服务) -->
+<section class="px-4 py-4 flex flex-col gap-5 border-b border-outline-variant/40">
+<!-- SVG 渐变定义 -->
+<svg class="hidden" height="0" width="0"><defs class=""><linearGradient id="mint-sparkle-grad" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" stop-color="#0ea5e9"></stop><stop offset="60%" stop-color="#10b981"></stop><stop offset="100%" stop-color="#34d399"></stop></linearGradient><linearGradient id="unselected-sparkle-grad" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" stop-color="#cbd5e1"></stop><stop offset="100%" stop-color="#94a3b8"></stop></linearGradient></defs></svg>
+<div class="flex items-center justify-between">
+<span class="text-[14px] font-semibold text-on-surface tracking-tight flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>本次训练完成情况与身体反馈</span>
+
+</div>
+<!-- 维度1: 主观强度 -->
+<div class="flex flex-col gap-2 pt-1">
+<div class="flex items-center justify-between">
+<span class="text-[13px] font-medium text-on-surface flex items-center gap-1.5">
+主观疲劳程度
+      </span>
+
+</div>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-3" id="stars-subjective"><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="1" aria-label="1 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="2" aria-label="2 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="3" aria-label="3 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="4" aria-label="4 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="5" aria-label="5 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button></div>
+
+</div>
+</div>
+<!-- 维度2: 身体强度 -->
+<div class="flex flex-col gap-2 pt-1">
+<div class="flex items-center justify-between">
+<span class="text-[13px] font-medium text-on-surface flex items-center gap-1.5">
+身体状态感受
+      </span>
+
+</div>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-3" id="stars-physical"><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="1" aria-label="1 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="2" aria-label="2 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="3" aria-label="3 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="4" aria-label="4 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="5" aria-label="5 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button></div>
+
+</div>
+</div>
+<!-- 维度3: 疼痛程度 -->
+<div class="flex flex-col gap-2 pt-1">
+<div class="flex items-center justify-between">
+<span class="text-[13px] font-medium text-on-surface flex items-center gap-1.5">
+疼痛不适程度
+      </span>
+
+</div>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-3" id="stars-pain"><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="1" aria-label="1 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="2" aria-label="2 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="3" aria-label="3 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="4" aria-label="4 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button><button class="transition-transform active:scale-125 focus:outline-none p-0.5" type="button" data-rating="5" aria-label="5 分"><svg class="w-7 h-7 drop-shadow-sm" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button></div>
+
+</div>
+
+</div>
+</section>
+<!-- 身体异常/不适快捷问询 -->
+<section class="px-4 py-3">
+<div class="flex items-center justify-between mb-2.5">
+<span class="text-[13px] font-semibold text-on-surface flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>是否有局部不适或疼痛？</span>
+</div>
+<div class="grid grid-cols-2 gap-2.5">
+<button class="h-10 rounded-xl bg-surface-dim text-on-surface-variant font-medium text-[13px] flex items-center justify-center gap-1.5 transition" id="btn-discomfort-no" type="button">
+<span class="material-symbols-outlined text-[17px]">check_circle</span>
+          无明显不适
+        </button>
+<button class="h-10 rounded-xl bg-surface-dim text-on-surface-variant font-medium text-[13px] flex items-center justify-center gap-1.5 transition" id="btn-discomfort-yes" type="button">
+<span class="material-symbols-outlined text-[17px]">healing</span>
+          有酸痛 / 不适
+        </button>
+</div>
+<!-- 选中“有不适”时展开部位细选 -->
+<div class="hidden mt-3 p-3 rounded-xl bg-surface-dim border border-outline-variant/60 flex-col gap-2" id="discomfort-box">
+<span class="text-[12px] text-on-surface-variant">请点选或注明受力不适部位：</span>
+<div class="flex flex-wrap gap-1.5">
+<button class="part-chip px-2.5 py-1 rounded-lg bg-white text-[12px] text-on-surface border border-outline-variant" type="button">左膝外侧</button>
+<button class="part-chip px-2.5 py-1 rounded-lg bg-white text-[12px] text-on-surface border border-outline-variant" type="button">右脚踝</button>
+<button class="part-chip px-2.5 py-1 rounded-lg bg-white text-[12px] text-on-surface border border-outline-variant" type="button">足底筋膜</button>
+<button class="part-chip px-2.5 py-1 rounded-lg bg-white text-[12px] text-on-surface border border-outline-variant" type="button">髂胫束/髋部</button>
+<button class="part-chip px-2.5 py-1 rounded-lg bg-white text-[12px] text-on-surface border border-outline-variant" type="button">跟腱</button>
+</div>
+<input class="w-full mt-1 px-3 py-2 text-[12px] bg-white rounded-lg border border-outline-variant focus:outline-none focus:border-primary" placeholder="请填写部位，如左膝外侧、右脚踝等" type="text">
+</div>
+</section>
+<!-- 详细评价输入框 (大众点评式评语区) -->
+<section class="px-4 py-3">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[13px] font-semibold text-on-surface flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>补充训练感受（选填）</span>
+
+</div>
+<div class="relative bg-surface-dim rounded-2xl p-3 border border-outline-variant/50">
+<textarea class="w-full bg-transparent text-[13px] text-on-surface placeholder:text-outline focus:outline-none resize-none" id="comment-box" maxlength="200" placeholder="告诉教练这次训练是否完成、哪里吃力，以及是否有疼痛或不适...（选填）" rows="3"></textarea>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="flex items-center gap-0.5 text-[11px] text-outline hover:text-on-surface-variant" type="button">
+<span class="material-symbols-outlined text-[16px]">add_a_photo</span>配图
+            </button>
+</div>
+<span class="text-[11px] text-outline" id="char-count">0 / 200</span>
+</div>
+</div>
+<div class="mt-5 flex justify-end"><button class="h-11 px-7 rounded-full bg-primary text-on-primary font-semibold text-[14px] flex items-center justify-center gap-1.5 shadow-md shadow-primary/25 active:scale-95 transition" id="submit-btn" type="button"><span class="">提交反馈</span><span class="material-symbols-outlined text-[17px]">arrow_forward</span></button></div></section>
+</main>
+<!-- 底部固定吸底操作栏 (大众点评式醒目大按钮) -->
+
+
+
+
+
+
+<script src="redesign-app.js" defer></script></body></html>
+
+

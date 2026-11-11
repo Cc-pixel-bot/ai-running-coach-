@@ -1,0 +1,545 @@
+<!DOCTYPE html><html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<meta content="mobile_tab" name="shell-type">
+<title>完整训练计划</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            DEFAULT: "#007AFF",
+            subtle: "#F0F6FF",
+            border: "#BFDBFE"
+          },
+          status: {
+            green: "#34C759",
+            greenBg: "#EBF9EE",
+            greenBorder: "#D1F2D9"
+          }
+        },
+        fontFamily: {
+          sans: ["-apple-system", "BlinkMacSystemFont", "SF Pro Text", "SF Pro Display", "Inter", "Helvetica Neue", "sans-serif"]
+        }
+      }
+    }
+  };
+</script>
+<style>
+  @layer base {
+    html, body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      overscroll-behavior-y: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+    }
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 24px); }
+    .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+  }
+  ::-webkit-scrollbar { display: none; }
+</style>
+<link rel="stylesheet" href="../assets/mobile.css?v=20261110"></head>
+<body class="min-h-full bg-[#F8F9FA] text-[#1D1D1F] antialiased flex flex-col font-sans selection:bg-[#007AFF]/10" data-page="plan-overview">
+<!-- 极简克制顶部导航条 -->
+<header class="fixed top-0 inset-x-0 z-50 bg-[#F8F9FA]/90 backdrop-blur-xl border-b border-black/[0.04] pt-safe">
+<div class="h-11 px-3 flex items-center justify-between">
+<button aria-label="返回" class="w-10 h-10 -ml-1 flex items-center justify-center text-[#1D1D1F] active:opacity-40 transition-opacity cursor-pointer" type="button">
+<span class="material-symbols-outlined text-[20px] font-medium text-[#1D1D1F]">arrow_back_ios_new</span>
+</button>
+<span class="text-[15px] font-semibold text-[#1D1D1F] tracking-tight">计划总览</span>
+<div class="w-10 h-10"></div>
+</div>
+</header>
+<!-- 主体内容区域：纵向长滚动浏览 -->
+<main class="flex-1 w-full pt-14 pb-14 pb-safe">
+<div class="max-w-md mx-auto px-4 flex flex-col gap-6">
+<!-- 顶部计划摘要看板 -->
+<section class="pt-3 pb-2 flex flex-col gap-4">
+<div class="flex flex-col gap-1.5">
+
+<h1 class="text-[26px] font-bold text-[#1D1D1F] tracking-tight leading-tight">10公里耐力突破计划</h1>
+
+</div>
+<!-- 精致双列/环形卡片区 -->
+<div class="flex items-center gap-4 py-1">
+<!-- 左侧环形进度圈 -->
+<div class="relative w-24 h-24 shrink-0 flex items-center justify-center">
+<svg class="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
+<!-- 底圈 -->
+<circle cx="48" cy="48" fill="none" r="40" stroke="#E5E7EB" stroke-width="7"></circle>
+<!-- 进度圈: 25% -->
+<circle cx="48" cy="48" fill="none" r="40" stroke="#007AFF" stroke-dasharray="251.32" stroke-dashoffset="188.49" stroke-linecap="round" stroke-width="7"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-[17px] font-bold tracking-tight text-[#1D1D1F] leading-none">25<span class="text-[11px] font-semibold text-[#007AFF]">%</span></span>
+<span class="text-[10px] text-[#86868B] mt-0.5 font-medium">6/24 节</span>
+<span class="text-[9px] text-[#007AFF] font-medium bg-[#007AFF]/10 px-1 rounded-sm mt-0.5">已跑37km</span>
+</div>
+</div>
+<!-- 右侧关键指标矩阵 -->
+<div class="flex-1 grid grid-cols-2 gap-y-2.5 gap-x-2 border-l border-black/[0.06] pl-4">
+<div class="flex flex-col">
+<span class="text-[11px] text-[#86868B]">目标距离</span>
+<span class="text-[14px] font-bold text-[#1D1D1F] tracking-tight">10 km</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] text-[#86868B]">目标成绩</span>
+<div class="flex items-baseline gap-1">
+<span class="text-[14px] font-bold text-[#1D1D1F]">55'00"</span>
+<span class="text-[10px] text-[#86868B]">5'30"</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] text-[#86868B]">计划周期</span>
+<span class="text-[14px] font-bold text-[#1D1D1F]">共 8 周</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] text-[#86868B]">频次 &amp; 总量</span>
+<span class="text-[13px] font-bold text-[#1D1D1F]">3-4次 · 168km</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 连续纵向时间线 (Timeline) -->
+<div class="relative flex flex-col pl-2"><!-- 贯穿全周期的竖向主时间轴线 -->
+  <div class="absolute left-[18px] top-6 bottom-6 w-[2px] bg-gradient-to-b from-[#34C759] via-[#007AFF] to-[#C1C6D7]/40 pointer-events-none z-0"></div>
+
+  <!-- ================= 第 1 周 (已完成) ================= -->
+  <details class="group relative mb-6 z-10">
+    <summary class="list-none cursor-pointer flex items-center gap-3 select-none">
+      <div class="w-9 h-9 rounded-full bg-[#34C759] text-white flex items-center justify-center font-bold text-[13px] shadow-[0_2px_8px_rgba(52,199,89,0.35)] shrink-0 ring-4 ring-[#F8F9FA]">W1</div>
+      <div class="flex-1 flex items-center justify-between min-w-0 pr-1 py-1">
+        <span class="text-[14px] font-bold text-[#1D1D1F]">第 1 周</span>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span class="text-[11px] font-semibold text-[#34C759]">3/3 已完成</span>
+          <span class="material-symbols-outlined text-[18px] text-[#86868B] transition-transform group-open:rotate-180">expand_more</span>
+        </div>
+      </div>
+    </summary>
+    <div class="ml-[18px] pl-6 pt-1.5 flex flex-col">
+      <!-- Day 1 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#34C759] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 1</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">初阶适应跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">5.0 km · 31分</span>
+          <span class="material-symbols-outlined text-[17px] text-[#34C759]">check_circle</span>
+        </div>
+      </div>
+      <!-- Day 2 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#34C759] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 2</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">有氧基础慢跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">6.0 km · 37分</span>
+          <span class="material-symbols-outlined text-[17px] text-[#34C759]">check_circle</span>
+        </div>
+      </div>
+      <!-- Day 3 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#34C759] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 3</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">周末基础耐力跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">7.0 km · 44分</span>
+          <span class="material-symbols-outlined text-[17px] text-[#34C759]">check_circle</span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ================= 第 2 周 (已完成) ================= -->
+  <details class="group relative mb-6 z-10">
+    <summary class="list-none cursor-pointer flex items-center gap-3 select-none">
+      <div class="w-9 h-9 rounded-full bg-[#34C759] text-white flex items-center justify-center font-bold text-[13px] shadow-[0_2px_8px_rgba(52,199,89,0.35)] shrink-0 ring-4 ring-[#F8F9FA]">W2</div>
+      <div class="flex-1 flex items-center justify-between min-w-0 pr-1 py-1">
+        <span class="text-[14px] font-bold text-[#1D1D1F]">第 2 周</span>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span class="text-[11px] font-semibold text-[#34C759]">3/3 已完成</span>
+          <span class="material-symbols-outlined text-[18px] text-[#86868B] transition-transform group-open:rotate-180">expand_more</span>
+        </div>
+      </div>
+    </summary>
+    <div class="ml-[18px] pl-6 pt-1.5 flex flex-col">
+      <!-- Day 1 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#34C759] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 1</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">稳态有氧慢跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">5.5 km · 33分</span>
+          <span class="material-symbols-outlined text-[17px] text-[#34C759]">check_circle</span>
+        </div>
+      </div>
+      <!-- Day 2 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#34C759] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 2</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">巡航节奏跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">5.5 km · 32分</span>
+          <span class="material-symbols-outlined text-[17px] text-[#34C759]">check_circle</span>
+        </div>
+      </div>
+      <!-- Day 3 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#34C759] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 3</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">进阶耐力稳态跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">8.0 km · 49分</span>
+          <span class="material-symbols-outlined text-[17px] text-[#34C759]">check_circle</span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ================= 第 3 周 (进行中) ================= -->
+  <div class="relative mb-6 z-10">
+    <div class="flex items-center gap-3 select-none mb-2">
+      <div class="w-9 h-9 rounded-full bg-[#007AFF] text-white flex items-center justify-center font-bold text-[13px] shadow-[0_2px_8px_rgba(0,122,255,0.35)] shrink-0 ring-4 ring-[#EAF2FF]">W3</div>
+      <div class="flex-1 flex items-center justify-between min-w-0 pr-1 py-1">
+        <h2 class="text-[14px] font-bold text-[#1D1D1F]">第 3 周</h2>
+        <span class="text-[11px] font-bold text-[#007AFF]">进行中 · 0/3</span>
+      </div>
+    </div>
+    <div class="ml-[18px] pl-6 pt-1 flex flex-col">
+      <!-- Day 1 (进行中) -->
+      <div class="relative py-3 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#007AFF] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-bold text-[#007AFF] shrink-0">Day 1</span>
+          <span class="text-[13px] font-bold text-[#1D1D1F] truncate">有氧筑底配速跑</span>
+        </div>
+        <div class="flex items-center gap-2.5 shrink-0">
+          <span class="text-[11px] font-medium text-[#414755]">6.0 km · 35分</span>
+          <button class="bg-[#007AFF] active:bg-[#0062CC] text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-[0_2px_8px_rgba(0,122,255,0.25)] flex items-center gap-0.5 cursor-pointer whitespace-nowrap shrink-0" type="button">
+            <span class="">去开跑</span>
+            <span class="material-symbols-outlined text-[12px]">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+      <!-- Day 2 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 2</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">间歇节奏跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">5.5 km · 32分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+      <!-- Day 3 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 3</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">耐力长距离跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">8.5 km · 51分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 第 4 周 (待进行) ================= -->
+  <details class="group relative mb-6 z-10">
+    <summary class="list-none cursor-pointer flex items-center gap-3 select-none">
+      <div class="w-9 h-9 rounded-full bg-white border border-[#C1C6D7] text-[#717786] flex items-center justify-center font-bold text-[13px] shrink-0 ring-4 ring-[#F8F9FA]">W4</div>
+      <div class="flex-1 flex items-center justify-between min-w-0 pr-1 py-1">
+        <span class="text-[14px] font-bold text-[#1D1D1F]">第 4 周</span>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span class="text-[11px] text-[#86868B]">0/3 待开始</span>
+          <span class="material-symbols-outlined text-[18px] text-[#86868B] transition-transform group-open:rotate-180">expand_more</span>
+        </div>
+      </div>
+    </summary>
+    <div class="ml-[18px] pl-6 pt-1.5 flex flex-col">
+      <!-- Day 1 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 1</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">适应性慢跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">5.0 km · 31分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+      <!-- Day 2 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 2</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">8公里配速检验跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">8.0 km · 45分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+      <!-- Day 3 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 3</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">测试后主动恢复</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">8.0 km · 50分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ================= 第 5 周 (待进行) ================= -->
+  <details class="group relative mb-6 z-10">
+    <summary class="list-none cursor-pointer flex items-center gap-3 select-none">
+      <div class="w-9 h-9 rounded-full bg-white border border-[#C1C6D7] text-[#717786] flex items-center justify-center font-bold text-[13px] shrink-0 ring-4 ring-[#F8F9FA]">W5</div>
+      <div class="flex-1 flex items-center justify-between min-w-0 pr-1 py-1">
+        <span class="text-[14px] font-bold text-[#1D1D1F]">第 5 周</span>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span class="text-[11px] text-[#86868B]">0/3 待开始</span>
+          <span class="material-symbols-outlined text-[18px] text-[#86868B] transition-transform group-open:rotate-180">expand_more</span>
+        </div>
+      </div>
+    </summary>
+    <div class="ml-[18px] pl-6 pt-1.5 flex flex-col">
+      <!-- Day 1 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 1</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">乳酸阈值突破跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">6.0 km · 33分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+      <!-- Day 2 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 2</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">800米间歇重复跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">6.0 km · 32分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+      <!-- Day 3 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 3</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">周期顶峰长距离</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">10.0 km · 60分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ================= 第 6 周 (待进行) ================= -->
+  <details class="group relative mb-6 z-10">
+    <summary class="list-none cursor-pointer flex items-center gap-3 select-none">
+      <div class="w-9 h-9 rounded-full bg-white border border-[#C1C6D7] text-[#717786] flex items-center justify-center font-bold text-[13px] shrink-0 ring-4 ring-[#F8F9FA]">W6</div>
+      <div class="flex-1 flex items-center justify-between min-w-0 pr-1 py-1">
+        <span class="text-[14px] font-bold text-[#1D1D1F]">第 6 周</span>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span class="text-[11px] text-[#86868B]">0/3 待开始</span>
+          <span class="material-symbols-outlined text-[18px] text-[#86868B] transition-transform group-open:rotate-180">expand_more</span>
+        </div>
+      </div>
+    </summary>
+    <div class="ml-[18px] pl-6 pt-1.5 flex flex-col">
+      <!-- Day 1 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 1</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">VO2 Max 间歇强化</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">6.5 km · 35分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+      <!-- Day 2 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 2</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">巡航配速稳定跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">6.0 km · 33分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+      <!-- Day 3 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 3</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">进阶巩固长跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">9.0 km · 53分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ================= 第 7 周 (待进行) ================= -->
+  <details class="group relative mb-6 z-10">
+    <summary class="list-none cursor-pointer flex items-center gap-3 select-none">
+      <div class="w-9 h-9 rounded-full bg-white border border-[#C1C6D7] text-[#717786] flex items-center justify-center font-bold text-[13px] shrink-0 ring-4 ring-[#F8F9FA]">W7</div>
+      <div class="flex-1 flex items-center justify-between min-w-0 pr-1 py-1">
+        <span class="text-[14px] font-bold text-[#1D1D1F]">第 7 周</span>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span class="text-[11px] text-[#86868B]">0/3 待开始</span>
+          <span class="material-symbols-outlined text-[18px] text-[#86868B] transition-transform group-open:rotate-180">expand_more</span>
+        </div>
+      </div>
+    </summary>
+    <div class="ml-[18px] pl-6 pt-1.5 flex flex-col">
+      <!-- Day 1 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 1</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">目标配速精确校准</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">6.0 km · 33分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+      <!-- Day 2 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 2</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">神经肌肉快频激活</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">5.0 km · 28分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+      <!-- Day 3 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 3</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">10公里全真模拟跑</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">10.0 km · 55分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ================= 第 8 周 (减量收尾) ================= -->
+  <details class="group relative mb-2 z-10">
+    <summary class="list-none cursor-pointer flex items-center gap-3 select-none">
+      <div class="w-9 h-9 rounded-full bg-white border border-[#007AFF] text-[#007AFF] flex items-center justify-center font-bold text-[13px] shadow-[0_2px_8px_rgba(0,122,255,0.2)] shrink-0 ring-4 ring-[#F8F9FA]">W8</div>
+      <div class="flex-1 flex items-center justify-between min-w-0 pr-1 py-1">
+        <span class="text-[14px] font-bold text-[#1D1D1F]">第 8 周</span>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span class="text-[11px] font-bold text-[#007AFF]">冲刺周</span>
+          <span class="material-symbols-outlined text-[18px] text-[#86868B] transition-transform group-open:rotate-180">expand_more</span>
+        </div>
+      </div>
+    </summary>
+    <div class="ml-[18px] pl-6 pt-1.5 flex flex-col">
+      <!-- Day 1 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 1</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">减量期动态巡航</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">5.0 km · 28分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+      <!-- Day 2 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#C1C6D7] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-semibold text-[#86868B] shrink-0">Day 2</span>
+          <span class="text-[13px] font-medium text-[#1D1D1F] truncate">身体机能唤醒</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] text-[#86868B]">3.0 km · 17分</span>
+          <span class="text-[11px] text-[#86868B]">待开始</span>
+        </div>
+      </div>
+      <!-- Day 3 -->
+      <div class="relative py-2.5 flex items-center justify-between gap-3 whitespace-nowrap">
+        <div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#007AFF] ring-2 ring-[#F8F9FA]"></div>
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="text-[12px] font-bold text-[#007AFF] shrink-0">Day 3</span>
+          <span class="text-[13px] font-bold text-[#007AFF] truncate">10公里耐力大关突破 (终极大考)</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-[11px] font-semibold text-[#007AFF]">10.0 km</span>
+          <span class="text-[11px] font-bold text-[#007AFF]">待挑战</span>
+        </div>
+      </div>
+    </div>
+  </details></div>
+</div>
+</main>
+
+
+
+
+
+
+
+
+
+
+
+<script src="../assets/redesign-app.js" defer></script></body></html>
+

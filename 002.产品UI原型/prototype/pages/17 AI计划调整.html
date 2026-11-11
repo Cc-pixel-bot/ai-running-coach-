@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<meta content="mobile_stack" name="shell-type">
+<title>智程如何调整你的计划</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+    }
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+    .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+    ::-webkit-scrollbar { display: none; }
+
+    @keyframes spinClockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes spinCounterClockwise {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+    @keyframes pulseEnergy {
+      0%, 100% { transform: scale(0.96); opacity: 0.55; }
+      50% { transform: scale(1.05); opacity: 0.95; }
+    }
+    @keyframes floatParticle {
+      0%, 100% { transform: translateY(0px) scale(0.9); opacity: 0.4; }
+      50% { transform: translateY(-7px) scale(1.15); opacity: 0.95; }
+    }
+    .orbit-outer {
+      animation: spinCounterClockwise 36s linear infinite;
+    }
+    .orbit-mid {
+      animation: spinClockwise 22s linear infinite;
+    }
+    .energy-pulse {
+      animation: pulseEnergy 3.2s ease-in-out infinite;
+    }
+    .particle-float-1 {
+      animation: floatParticle 3.8s ease-in-out infinite;
+    }
+    .particle-float-2 {
+      animation: floatParticle 4.4s ease-in-out infinite 1.2s;
+    }
+    .particle-float-3 {
+      animation: floatParticle 3.2s ease-in-out infinite 0.7s;
+    }
+</style>
+<link rel="stylesheet" href="../assets/mobile.css?v=20261110"></head>
+<body class="bg-[#050B14] text-white antialiased flex flex-col min-h-screen selection:bg-[#007AFF]/30 selection:text-cyan-200" data-page="plan-adjust">
+<div class="w-full max-w-[420px] mx-auto min-h-screen bg-[#060B14] flex flex-col justify-between px-4 pt-4 pb-8 relative select-none">
+<!-- 背景微光氛围 -->
+<div class="absolute -top-16 left-1/2 -translate-x-1/2 w-88 h-88 bg-[#007AFF]/15 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="absolute top-1/4 -right-12 w-64 h-64 bg-[#00E599]/10 rounded-full blur-[90px] pointer-events-none"></div>
+<!-- 页面主标题区 -->
+<div class="mt-2.5 mb-1 relative z-10">
+<h1 class="text-[20px] font-bold tracking-tight text-white flex items-center gap-2">
+      正在为你动态调整训练计划
+</h1>
+</div>
+<main class="w-full my-0.5 space-y-3 relative z-10">
+<!-- 【区域 2：强化版 AI 训练引擎超级视觉焦点】 -->
+<section class="w-full relative py-3 flex flex-col items-center justify-center overflow-visible">
+<!-- 两侧流动数据线与标签连接象征 -->
+<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-between px-1 pointer-events-none z-0">
+<!-- 左侧：实跑数据汇入线 -->
+<div class="flex items-center gap-1 opacity-70">
+<span class="text-[10px] text-cyan-300/80 font-medium hidden sm:inline-block">实跑数据</span>
+<div class="relative w-14 sm:w-16 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/40 to-cyan-300">
+<span class="flow-dot-left absolute -top-[2px] left-0 w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_6px_#22d3ee]"></span>
+</div>
+</div>
+<!-- 右侧：训练反馈汇入线 -->
+<div class="flex items-center gap-1 opacity-70">
+<div class="relative w-14 sm:w-16 h-[1px] bg-gradient-to-l from-transparent via-[#00E599]/40 to-[#00E599]">
+<span class="flow-dot-right absolute -top-[2px] right-0 w-1.5 h-1.5 rounded-full bg-[#00E599] shadow-[0_0_6px_#00E599]"></span>
+</div>
+<span class="text-[10px] text-emerald-300/80 font-medium hidden sm:inline-block">训练反馈</span>
+</div>
+</div>
+<!-- 中心同心多层轨道环容器 -->
+<div class="relative w-52 h-52 flex items-center justify-center">
+<!-- 基础底层漫反射光晕 -->
+<div class="absolute w-44 h-44 rounded-full bg-gradient-to-br from-[#007AFF]/25 via-cyan-500/20 to-[#00E599]/20 blur-2xl pointer-events-none"></div>
+<!-- 最外层：慢速逆时针刻度虚线环 (直径 196px) -->
+<div class="orbit-outer absolute w-[196px] h-[196px] rounded-full border border-dashed border-cyan-400/25 pointer-events-none">
+<!-- 刻度端点光标点 -->
+<div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-cyan-300 shadow-[0_0_8px_#22d3ee]"></div>
+<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></div>
+</div>
+<!-- 中层：顺时针精细微光双轨环 (直径 164px) -->
+<div class="orbit-mid absolute w-[164px] h-[164px] rounded-full border border-blue-400/30 pointer-events-none">
+<div class="absolute inset-[3px] rounded-full border border-dotted border-emerald-400/25"></div>
+<!-- 旋转光斑与粒子伴随 -->
+<div class="absolute top-2 right-4 w-2 h-2 rounded-full bg-cyan-400/80 blur-[0.5px] shadow-[0_0_8px_#22d3ee]"></div>
+<div class="absolute bottom-3 left-4 w-1.5 h-1.5 rounded-full bg-[#00E599] shadow-[0_0_6px_#00E599]"></div>
+</div>
+<!-- 漂浮流动粒子与微光点 -->
+<div class="particle-float absolute top-3 left-7 w-1.5 h-1.5 rounded-full bg-cyan-300/80 shadow-[0_0_6px_#67e8f9] pointer-events-none"></div>
+<div class="particle-float absolute bottom-4 right-8 w-2 h-2 rounded-full bg-emerald-300/70 shadow-[0_0_6px_#6ee7b7] pointer-events-none" style="animation-delay: 1.5s;"></div>
+<div class="particle-float absolute top-10 right-5 w-1 h-1 rounded-full bg-blue-300/80 pointer-events-none" style="animation-delay: 0.8s;"></div>
+<!-- 内层：发光呼吸能量环 (直径 130px) -->
+<div class="energy-pulse absolute w-[130px] h-[130px] rounded-full border-2 border-cyan-400/40 bg-gradient-to-tr from-[#007AFF]/15 via-transparent to-[#00E599]/15 shadow-[0_0_24px_rgba(0,122,255,0.35)] pointer-events-none"></div>
+<!-- AI 晶体核心枢纽 (直径 106px) -->
+<div class="relative w-[106px] h-[106px] rounded-full bg-gradient-to-b from-[#0c192e] via-[#091322] to-[#050b14] border border-cyan-300/60 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(0,122,255,0.45),inset_0_1px_2px_rgba(255,255,255,0.4)] backdrop-blur-xl z-10">
+<span class="material-symbols-outlined text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-white to-emerald-300 text-2xl font-bold filter drop-shadow-[0_0_6px_rgba(34,211,238,0.7)]">auto_awesome</span>
+<span class="text-[12px] font-bold text-white tracking-widest mt-0.5">智程 AI</span>
+</div>
+</div>
+</section>
+<!-- 【区域 3：四步状态流程卡片】 -->
+<div class="w-full bg-slate-900/70 backdrop-blur-xl rounded-2xl p-3.5 border border-cyan-500/20 shadow-xl space-y-2.5">
+<!-- 步骤 1 -->
+<div class="flex items-start gap-2.5 p-2 rounded-xl bg-slate-800/40 border border-emerald-500/25 transition-all">
+<div class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-emerald-400 text-sm font-bold">check</span>
+</div>
+<div class="flex-1 min-w-0"><div class="flex items-center justify-between"><h4 class="text-xs font-semibold text-slate-100">1. 分析本次训练完成情况</h4><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-medium border border-emerald-500/30">已完成</span></div><p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">已对比计划内容与本次实际完成情况</p></div>
+</div>
+<!-- 步骤 2 -->
+<div class="flex items-start gap-2.5 p-2 rounded-xl bg-slate-800/40 border border-emerald-500/25 transition-all">
+<div class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-emerald-400 text-sm font-bold">check</span>
+</div>
+<div class="flex-1 min-w-0"><div class="flex items-center justify-between"><h4 class="text-xs font-semibold text-slate-100">2. 评估训练反馈与风险</h4><span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-medium border border-emerald-500/30">已完成</span></div><p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">综合主观疲劳、身体状态与疼痛反馈</p></div>
+</div>
+<!-- 步骤 3 -->
+<div class="flex items-start gap-2.5 p-2 rounded-xl bg-blue-950/40 border border-cyan-500/40 transition-all shadow-[0_0_12px_rgba(6,182,212,0.1)]">
+<div class="w-6 h-6 rounded-full bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-cyan-400 text-sm animate-spin">sync</span>
+</div>
+<div class="flex-1 min-w-0"><div class="flex items-center justify-between"><h4 class="text-xs font-semibold text-cyan-100">3. 调整后续训练负荷</h4><span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-medium border border-cyan-500/30 animate-pulse">推进中</span></div><p class="text-[11px] text-slate-300 mt-0.5 leading-relaxed">根据本次反馈调整未来 1–3 次训练内容和强度</p></div>
+</div>
+<!-- 步骤 4 -->
+<div class="flex items-start gap-2.5 p-2 rounded-xl bg-slate-800/20 border border-slate-700/50 opacity-80">
+<div class="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-slate-400"></span>
+</div>
+<div class="flex-1 min-w-0"><div class="flex items-center justify-between"><h4 class="text-xs font-semibold text-slate-300">4. 校准后续训练安排</h4><span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-medium">等待中</span></div><p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">结合本周安排调整后续训练衔接</p></div>
+</div>
+</div>
+</main>
+<!-- 【区域 4：底部状态主按钮】 -->
+<footer class="w-full mt-3 space-y-2 relative z-10">
+<button class="h-12 w-full bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white rounded-full font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(0,122,255,0.35)] cursor-pointer" id="ctaBtn" type="button">
+<span class="material-symbols-outlined text-base animate-spin">sync</span>
+<span class="">正在调整后续训练 ..</span>
+</button>
+<div class="text-center">
+<span class="text-[11px] text-slate-500 tracking-tight">运动科学自适应算法 · 护航周期进阶与健康防伤</span>
+</div>
+</footer>
+</div>
+
+
+
+
+
+<script src="redesign-app.js" defer></script></body></html>
+

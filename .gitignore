@@ -1,0 +1,17 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# JavaScript build artifacts
+node_modules/
+dist/
+coverage/
+npm-debug.log*
+*.log
+
+# Operating system and Python cache files
+.DS_Store
+Thumbs.db
+__pycache__/
+*.py[cod]

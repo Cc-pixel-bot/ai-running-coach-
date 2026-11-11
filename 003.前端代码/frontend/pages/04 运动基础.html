@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>新版建档 3 - 运动基础</title>
+  <link rel="stylesheet" href="../assets/redesign.css">
+</head>
+<body data-page="profile-running">
+  <div class="phone">
+    <header class="topbar">
+      <span class="back" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 19-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <div class="steps" aria-label="第3页，共5页"><span class="active"></span><span class="active"></span><span class="active"></span><span></span><span></span></div>
+      <span style="width:40px"></span>
+    </header>
+    <main class="content">
+      <h1>告诉我你的基础</h1>
+      <section class="card data-card">
+        <div class="data-row"><label for="longest-run">最近最长一次连续跑（公里）</label><input id="longest-run" type="number" inputmode="decimal" min="5" max="20" step="0.1"></div>
+        <div class="data-row"><label for="latest-10k">最近一次10km成绩（分钟）</label><input id="latest-10k" type="number" inputmode="numeric" min="40" max="80"></div>
+        <div class="data-row"><label for="train-days">每周可训练几天</label><input id="train-days" type="number" inputmode="numeric" min="3" max="7"></div>
+      </section>
+    </main>
+    <footer class="action"><button type="button">继续 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h16m-7-7 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></footer>
+  </div>
+<script src="../assets/redesign-app.js" defer></script></body>
+</html>

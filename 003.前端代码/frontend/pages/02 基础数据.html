@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>新版建档 1 - 基础数据</title>
+  <link rel="stylesheet" href="../assets/redesign.css">
+</head>
+<body data-page="profile-basic">
+  <div class="phone">
+    <header class="topbar">
+      <span class="back" aria-hidden="true"></span>
+      <div class="steps" aria-label="第1页，共5页"><span class="active"></span><span></span><span></span><span></span><span></span></div>
+      <span style="width:40px"></span>
+    </header>
+    <main class="content">
+      <h1>了解你的基础数据</h1>
+      <section class="card measure-card">
+        <div class="measure">
+          <label for="height">身高</label>
+          <div class="measure-value"><input id="height" type="number" inputmode="numeric" min="150" max="210" step="1" aria-label="身高，厘米"><div class="measure-stepper" aria-label="调整身高"><button type="button" data-measure-step="up" aria-label="身高增加">▲</button><button type="button" data-measure-step="down" aria-label="身高减少">▼</button></div><span>cm</span></div>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="measure">
+          <label for="weight">体重</label>
+          <div class="measure-value"><input id="weight" type="number" inputmode="numeric" min="40" max="120" step="1" aria-label="体重，千克"><div class="measure-stepper" aria-label="调整体重"><button type="button" data-measure-step="up" aria-label="体重增加">▲</button><button type="button" data-measure-step="down" aria-label="体重减少">▼</button></div><span>kg</span></div>
+        </div>
+      </section>
+    </main>
+    <footer class="action"><button type="button" disabled>继续 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h16m-7-7 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></footer>
+  </div>
+<script src="../assets/redesign-app.js" defer></script></body>
+</html>
