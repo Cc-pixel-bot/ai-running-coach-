@@ -5,13 +5,24 @@
 ## 项目结构
 
 ```text
-001.产品相关文件/知识库/     训练课程与计划调整规则
-002.产品UI原型/prototype/    UI 参考稿
-003.前端代码/frontend/       当前页面与静态资源
-004.数据库脚本/              MySQL 初始化 SQL
-backend/                     FastAPI 服务
-docker-compose.yml           项目独立 MySQL 与 API 容器
+001.产品相关文件/
+  产品prd/                   产品需求与范围说明
+  知识库/                    首次计划课程库、反馈调整规则、动作参考
+002.产品UI原型/prototype/    UI 设计参考，不是线上运行页面
+003.前端代码/frontend/
+  pages/                     当前正式页面（01–19）
+  assets/                    共享脚本、样式和图片资源
+  redesign/                  旧页面地址的兼容跳转，不放页面实现
+004.数据库脚本/
+  001_init_mysql.sql         新库完整初始化结构
+  002_表中文注释.sql         数据表字段注释
+  003_workout_distance_pace.sql  已有数据库的距离/配速字段升级
+backend/                     FastAPI API 与 Dify 调用、校验和持久化
+docker-compose.yml           本项目独立 API 与 MySQL 服务
+.env.example                 本地配置模板；实际密钥仅保存在未跟踪的 .env
 ```
+
+正式运行入口以 `003.前端代码/frontend/`、`backend/` 和 `004.数据库脚本/` 为准。UI 原型、兼容跳转页不作为正式页面源文件。首次计划和训练反馈调整均由 Dify 工作流生成；后端负责身份、参数、课程与计划约束校验，以及保存和返回结果。
 
 ## 启动应用
 
@@ -41,3 +52,4 @@ docker compose down
 - 计划生成和训练反馈调整均调用 Dify 工作流；后端只负责传参、校验输出并保存结果。将两个工作流 API Key 写入 `.env` 后即可启用 Dify 调用。流程变量映射和当前 Dify 输出契约见 [backend/SETUP.md](backend/SETUP.md)。
 - 训练页面的计时和距离仍为原型模拟值；连接手机 GPS 和健康设备需要后续开发。
 - 前端源码以 `003.前端代码/frontend/pages/` 为准。
+- 新建数据库使用 `001_init_mysql.sql`；已有数据库升级使用对应的编号升级脚本，不要删除数据卷来应用结构变更。

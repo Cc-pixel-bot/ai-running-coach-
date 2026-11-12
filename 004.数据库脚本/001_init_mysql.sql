@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS app_user (
     UNIQUE KEY uq_app_user_account (account),
     CONSTRAINT ck_app_user_status CHECK (status IN ('active', 'disabled', 'deleted')),
     CONSTRAINT ck_app_user_account CHECK (account REGEXP '^[A-Za-z0-9]+$')
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户账号、密码哈希与账号状态';
 
 -- 一位跑者一份当前档案；计划保存档案快照，以保留生成当时的依据。
 CREATE TABLE IF NOT EXISTS runner_profile (
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS runner_profile (
     CONSTRAINT ck_profile_latest_10k CHECK (latest_10k_minutes IS NULL OR latest_10k_minutes > 0),
     CONSTRAINT ck_profile_train_days CHECK (train_days BETWEEN 1 AND 7),
     CONSTRAINT ck_profile_target CHECK (target_minutes IS NULL OR target_minutes > 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='跑者身体数据、训练目标与基础档案';
 
 CREATE TABLE IF NOT EXISTS training_plan (
     id                  CHAR(36) NOT NULL PRIMARY KEY,
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS training_plan (
     CONSTRAINT ck_plan_weeks CHECK (weeks BETWEEN 8 AND 12),
     CONSTRAINT ck_plan_train_days CHECK (train_days BETWEEN 1 AND 7),
     CONSTRAINT ck_plan_source CHECK (source IN ('dify', 'manual', 'import'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='训练计划版本、目标、周期与生成状态';
 
 -- 知识库课程目录和来源引用。正式生成计划时，后端应确保每个 workout 关联有效课程。
 CREATE TABLE IF NOT EXISTS course_catalog (
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS course_catalog (
     synced_at       DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     UNIQUE KEY uq_course_source_key (source_key),
     CONSTRAINT ck_course_type CHECK (type IN ('easy','recovery','long','quality','tempo','interval','other'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='训练课程目录，包含课程编号、名称和知识库内容';
 
 CREATE TABLE IF NOT EXISTS workout (
     id                  CHAR(36) NOT NULL PRIMARY KEY,
@@ -96,6 +96,9 @@ CREATE TABLE IF NOT EXISTS workout (
     title               VARCHAR(160) NOT NULL,
     duration_min        SMALLINT UNSIGNED NULL,
     distance_km         DECIMAL(6,2) NULL,
+    distance_min_km     DECIMAL(6,2) NULL,
+    distance_max_km     DECIMAL(6,2) NULL,
+    pace_range_min_per_km VARCHAR(1000) NULL,
     intensity           VARCHAR(120) NOT NULL,
     talk_test           VARCHAR(1000) NOT NULL DEFAULT '',
     purpose             VARCHAR(1000) NOT NULL DEFAULT '',
@@ -112,8 +115,13 @@ CREATE TABLE IF NOT EXISTS workout (
     CONSTRAINT ck_workout_type CHECK (type IN ('easy','recovery','long','quality','tempo','interval','rest','other')),
     CONSTRAINT ck_workout_status CHECK (status IN ('scheduled','in_progress','completed','partial','missed','skipped')),
     CONSTRAINT ck_workout_has_target CHECK (duration_min IS NOT NULL OR distance_km IS NOT NULL),
-    CONSTRAINT ck_workout_positive_distance CHECK (distance_km IS NULL OR distance_km > 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    CONSTRAINT ck_workout_positive_distance CHECK (distance_km IS NULL OR distance_km > 0),
+    CONSTRAINT ck_workout_distance_range CHECK (
+        (distance_min_km IS NULL AND distance_max_km IS NULL)
+        OR (distance_min_km IS NOT NULL AND distance_max_km IS NOT NULL
+            AND distance_min_km > 0 AND distance_max_km >= distance_min_km)
+    )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='训练计划中的课程安排与训练目标';
 
 CREATE TABLE IF NOT EXISTS training_record (
     id                  CHAR(36) NOT NULL PRIMARY KEY,
@@ -135,7 +143,7 @@ CREATE TABLE IF NOT EXISTS training_record (
     CONSTRAINT ck_record_duration CHECK (actual_duration_min IS NULL OR actual_duration_min >= 0),
     CONSTRAINT ck_record_pace CHECK (pace_seconds_per_km IS NULL OR pace_seconds_per_km > 0),
     CONSTRAINT ck_record_time CHECK (completed_at IS NULL OR started_at IS NULL OR completed_at >= started_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='单次训练执行记录及实际距离、时长和配速';
 
 CREATE TABLE IF NOT EXISTS training_feedback (
     id                  CHAR(36) NOT NULL PRIMARY KEY,
@@ -158,7 +166,7 @@ CREATE TABLE IF NOT EXISTS training_feedback (
     CONSTRAINT ck_feedback_subjective CHECK (subjective BETWEEN 1 AND 5),
     CONSTRAINT ck_feedback_physical CHECK (physical BETWEEN 1 AND 5),
     CONSTRAINT ck_feedback_pain CHECK (pain BETWEEN 1 AND 5)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='训练反馈、身体状态、疼痛信息与分析结果';
 
 -- AI 调用审计摘要与幂等键；不要在摘要中存储密码或密钥。
 CREATE TABLE IF NOT EXISTS ai_workflow_run (
@@ -182,4 +190,4 @@ CREATE TABLE IF NOT EXISTS ai_workflow_run (
     CONSTRAINT fk_ai_run_feedback FOREIGN KEY (related_feedback_id) REFERENCES training_feedback(id) ON DELETE SET NULL,
     CONSTRAINT ck_ai_run_type CHECK (workflow_type IN ('plan_generate','feedback_analyze','plan_adjust')),
     CONSTRAINT ck_ai_run_status CHECK (status IN ('pending','succeeded','failed'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Dify 工作流调用记录、请求响应摘要与校验结果';

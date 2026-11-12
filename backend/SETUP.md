@@ -31,8 +31,18 @@ docker compose ps
 - `POST /api/training-records/{id}/feedback`
 - `POST /api/training-records/{id}/adjust-plan`
 
+反馈页只提交 1–5 分的疼痛评分，不采集“是否不适”或部位列表。后端始终按调整知识库规则从评分推导 `discomfort`（`pain>=3` 为 `true`），`discomfort_parts` 始终为空数组。数据库列与 Dify 的 `training_feedback` 字段作为内部派生数据继续使用，不需要数据库迁移或修改 Dify 工作流。
+
+训练反馈调整时，`training_feedback.completed` 同时包含本次实际训练数据：`distanceKm`、`durationMin` 和格式为 `m:ss min/km` 的 `pace`。这些值从 `training_record` 已保存的实际距离、时长和每公里秒数读取；无值时传 `null`。它们与评分和文字备注一起放入现有 `training_feedback` JSON 输入。
+
+当 Dify 的 `rest` / `medical_review` 结果把取消的课程放在 `planChanges`（而 `workouts` 为空）时，后端会校验这些日期仍在允许调整范围内，并将对应课程标记为 `skipped`、时长记为 0。
+
 首次计划流程的起始变量为 `goal`、`longest_run_km`、`latest_10k_minutes`、`train_days`、`target_minutes`、`health_status`、`retrieval_query`、`body_data`。画布显示输出变量 `text`，已发布 API 可能返回 `training_plan`；后端兼容两者。每条计划课程必须带知识库中的 `courseKey` 和准确 `title`，后端会按本地课程目录校验后保存。
 
-反馈调整流程的起始变量为 `current_plan`、`training_feedback`，最终输出变量为 `adjusted_plan`、`warmup_stretch_sources`、`feedback_analysis`。`current_plan.recentWorkouts`提供截至本次反馈课在内最近最多三节训练作为上下文，包含已完成训练但只读；`current_plan.adjustmentTargets`按 `next_1`、`next_2`、`next_3` 和 `current_week`给出可以修改的未来课程。后端校验 Dify 返回的课程身份和调整日期，越界结果不会入库。
+每节课的 `distanceRangeKm` 必须是两个递增的有限数字，`paceRangeMinPerKm` 必须包含具体分钟/公里区间。后端保留范围到 workout，`GET /api/plans/active` 和 `GET /api/workouts/today` 会返回这两个字段；`distanceKm` 仍为兼容用的可选单值。旧 workout 缺少新值时，会从关联课程目录中的首次计划知识库课程块读取通用距离和配速范围。
+
+已有数据库升级时，使用项目 MySQL 数据库执行 `004.数据库脚本/003_workout_distance_pace.sql`；该脚本不会清空用户数据，可重复执行。新建数据库则由 `001_init_mysql.sql` 建立包含新字段的完整结构。升级后需重启/重建 API 容器以加载后端代码。
+
+反馈调整流程的起始变量为 `current_plan`、`training_feedback`，最终输出变量为 `adjusted_plan`、`warmup_stretch_sources`。`adjusted_plan` 对象包含 `status`、`ruleId`、`adjustmentScope`、`workouts`、`planChanges` 和 `feedback_analysis`；不包含 `reason`。后端从该对象读取说明并返回给前端，不配置独立的顶层 `feedback_analysis` 输出。`current_plan.recentWorkouts`提供截至本次反馈课在内最近最多三节训练作为上下文，包含已完成训练但只读；`current_plan.adjustmentTargets`按 `next_1`、`next_2`、`next_3` 和 `current_week`给出可以修改的未来课程。后端校验 Dify 返回的课程身份和调整日期，越界结果不会入库。
 
 若 API Key 未配置，计划/调整接口会返回 503，不会生成本地替代计划。结果页展示 Dify 的反馈分析以及课程 ID、课程名称和训练负荷变化。

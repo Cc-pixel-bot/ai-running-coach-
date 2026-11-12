@@ -5,6 +5,10 @@ import hashlib
 import os
 import re
 import uuid
+import queue
+import threading
+import contextvars
+import math
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -14,6 +18,7 @@ from typing import Any
 import jwt
 import bcrypt
 from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
@@ -28,6 +33,7 @@ TOKEN_TTL_HOURS = 24 * 7
 DIFY_API_BASE_URL = os.environ.get("DIFY_API_BASE_URL", "http://172.22.0.1/v1").rstrip("/")
 DIFY_PLAN_API_KEY = os.environ.get("DIFY_PLAN_API_KEY", "")
 DIFY_ADJUST_API_KEY = os.environ.get("DIFY_ADJUST_API_KEY", "")
+WORKFLOW_PROGRESS = contextvars.ContextVar("workflow_progress", default=None)
 KNOWLEDGE_BASE_DIR = Path(os.environ.get("KNOWLEDGE_BASE_DIR", "../001.产品相关文件/知识库")).resolve()
 engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=1800)
 Session = sessionmaker(bind=engine, expire_on_commit=False)
@@ -45,6 +51,64 @@ def json_value(value: Any) -> Any:
     if isinstance(value, (dict, list)):
         return value
     return json.loads(value)
+
+
+def parse_course_ranges(content: Any) -> tuple[float | None, float | None, str | None]:
+    """Read the generic range defaults from the stored knowledge-base course block."""
+    try:
+        course = json_value(content) if content is not None else None
+    except (TypeError, json.JSONDecodeError):
+        return None, None, None
+    if not isinstance(course, dict):
+        return None, None, None
+    body = str(course.get("body") or "")
+    distance_line = re.search(r"距离范围\s*[:：]\s*([^\r\n]+)", body)
+    distance_match = re.search(r"(\d+(?:\.\d+)?)\s*[–—-]\s*(\d+(?:\.\d+)?)\s*km", distance_line.group(1), re.I) if distance_line else None
+    distance_min = float(distance_match.group(1)) if distance_match else None
+    distance_max = float(distance_match.group(2)) if distance_match else None
+    pace_line = re.search(r"配速范围\s*[:：]\s*([^\r\n]+)", body)
+    pace = re.sub(r"[`*_]", "", pace_line.group(1)).strip().rstrip("。 ") if pace_line else None
+    return distance_min, distance_max, pace or None
+
+
+def workout_range_values(item: dict, course_content: Any = None, *, required: bool = False) -> tuple[float | None, float | None, str | None]:
+    raw_distance = item.get("distanceRangeKm")
+    raw_pace = item.get("paceRangeMinPerKm")
+    has_distance = raw_distance is not None
+    has_pace = raw_pace is not None
+    if has_distance != has_pace:
+        raise HTTPException(status_code=502, detail="课程距离和配速范围必须同时提供")
+    if not has_distance and not has_pace and course_content is not None and not required:
+        raw_min, raw_max, raw_pace = parse_course_ranges(course_content)
+    elif has_distance and has_pace:
+        if (not isinstance(raw_distance, list) or len(raw_distance) != 2
+                or any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) for value in raw_distance)):
+            raise HTTPException(status_code=502, detail="课程 distanceRangeKm 必须是两个有限数值组成的数组")
+        raw_min, raw_max = float(raw_distance[0]), float(raw_distance[1])
+        if raw_min <= 0 or raw_max < raw_min:
+            raise HTTPException(status_code=502, detail="课程距离范围必须为正数且按升序排列")
+        if not isinstance(raw_pace, str) or not raw_pace.strip() or not re.search(r"\d{1,2}:\d{2}\s*[–—-]\s*\d{1,2}:\d{2}\s*min/km", raw_pace, re.I):
+            raise HTTPException(status_code=502, detail="课程 paceRangeMinPerKm 必须包含具体分钟/公里区间")
+        raw_pace = raw_pace.strip()
+    else:
+        raw_min = raw_max = None
+    if required and (raw_min is None or raw_max is None or not raw_pace):
+        raise HTTPException(status_code=502, detail="Dify 计划课程必须包含具体距离和配速范围")
+    return raw_min, raw_max, raw_pace
+
+
+def workout_range_payload(row: Any) -> tuple[list[float] | None, str | None]:
+    distance_min, distance_max = row["distance_min_km"], row["distance_max_km"]
+    pace = row["pace_range_min_per_km"]
+    if distance_min is not None and distance_max is not None and pace:
+        return [float(distance_min), float(distance_max)], pace
+    fallback_min, fallback_max, fallback_pace = parse_course_ranges(row["course_content"] if "course_content" in row else None)
+    if distance_min is None or distance_max is None:
+        distance_min, distance_max = fallback_min, fallback_max
+    if not pace:
+        pace = fallback_pace
+    distance_range = [float(distance_min), float(distance_max)] if distance_min is not None and distance_max is not None else None
+    return distance_range, pace
 
 
 def token_for(user_id: str, account: str) -> str:
@@ -96,8 +160,6 @@ class Feedback(BaseModel):
     subjective: int = Field(ge=1, le=5)
     physical: int = Field(ge=1, le=5)
     pain: int = Field(ge=1, le=5)
-    discomfort: bool
-    discomfortParts: list[str] = Field(default_factory=list)
     note: str = Field(default="", max_length=200)
     completion: str = "completed"
 
@@ -141,6 +203,7 @@ def plan_payload(db, plan):
         "createdAt": plan["created_at"].isoformat(), "workouts": [{
             "id": w["id"], "week": w["week_no"], "day": w["day_no"], "type": w["type"], "title": w["title"],
             "durationMin": w["duration_min"], "distanceKm": float(w["distance_km"]) if w["distance_km"] is not None else None,
+            "distanceRangeKm": workout_range_payload(w)[0], "paceRangeMinPerKm": workout_range_payload(w)[1],
             "intensity": w["intensity"], "talkTest": w["talk_test"], "purpose": w["purpose"],
             "prerequisite": w["prerequisite"], "downgradeRule": w["downgrade_rule"], "status": w["status"],
             "courseId": w["course_id"], "courseKey": w["source_key"], "courseName": w["title"],
@@ -182,18 +245,76 @@ def dify_workflow(api_key: str, workflow_name: str, inputs: dict, user_id: str) 
         raise HTTPException(status_code=503, detail=f"尚未配置 Dify {workflow_name} 工作流 API Key")
     request = urllib.request.Request(
         f"{DIFY_API_BASE_URL}/workflows/run",
-        data=json.dumps({"inputs": inputs, "response_mode": "blocking", "user": user_id}, ensure_ascii=False).encode("utf-8"),
+        data=json.dumps({"inputs": inputs, "response_mode": "streaming", "user": user_id}, ensure_ascii=False).encode("utf-8"),
         headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}, method="POST",
     )
     try:
         with urllib.request.urlopen(request, timeout=180) as response:
-            payload = json.loads(response.read().decode("utf-8"))
+            event_name, outputs = "", None
+            for raw_line in response:
+                line = raw_line.decode("utf-8", errors="replace").strip()
+                if line.startswith("event:"):
+                    event_name = line[6:].strip()
+                elif line.startswith("data:"):
+                    raw_data = line[5:].strip()
+                    try:
+                        event_data = json.loads(raw_data)
+                    except json.JSONDecodeError:
+                        continue
+                    # Dify streams may send the event name as an SSE `event:` field
+                    # or only inside the JSON payload's `event` property.
+                    current_event = event_data.get("event") or event_name
+                    if current_event in {"node_started", "node_finished"}:
+                        callback = WORKFLOW_PROGRESS.get()
+                        node = event_data.get("data") or event_data
+                        if callback:
+                            callback({"event": current_event, "title": node.get("title", ""), "nodeType": node.get("node_type", "")})
+                    elif current_event == "workflow_started":
+                        callback = WORKFLOW_PROGRESS.get()
+                        if callback:
+                            callback({"event": current_event, "title": "", "nodeType": ""})
+                    elif current_event == "workflow_finished":
+                        run_data = event_data.get("data") or event_data
+                        if run_data.get("status") not in (None, "succeeded"):
+                            raise HTTPException(status_code=502, detail=f"Dify {workflow_name} 工作流执行失败")
+                        outputs = run_data.get("outputs") or run_data.get("outputs_dict")
+                        if not isinstance(outputs, dict):
+                            outputs = event_data.get("outputs") or event_data.get("outputs_dict")
+                        if isinstance(outputs, str):
+                            try:
+                                outputs = json.loads(outputs)
+                            except json.JSONDecodeError:
+                                outputs = None
+                    elif current_event in {"error", "workflow_failed"}:
+                        error_data = event_data.get("data") or event_data
+                        raise HTTPException(status_code=502, detail=str(error_data.get("message") or f"Dify {workflow_name} 工作流执行失败"))
+                elif not line:
+                    event_name = ""
+            if not isinstance(outputs, dict):
+                raise HTTPException(status_code=502, detail=f"Dify {workflow_name} 工作流未返回有效输出")
+            return outputs
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         raise HTTPException(status_code=502, detail=f"Dify {workflow_name} 工作流调用失败") from exc
-    run_data = payload.get("data", {})
-    if (payload.get("status") or run_data.get("status")) not in (None, "succeeded") or not isinstance(run_data.get("outputs"), dict):
-        raise HTTPException(status_code=502, detail=f"Dify {workflow_name} 工作流未返回有效输出")
-    return payload["data"]["outputs"]
+
+
+def workflow_stream(run_call):
+    events = queue.Queue()
+    sentinel = object()
+    def emit(event): events.put(event)
+    def run():
+        marker = WORKFLOW_PROGRESS.set(emit)
+        try: events.put({"event": "result", "data": run_call()})
+        except Exception as exc: events.put({"event": "error", "message": getattr(exc, "detail", str(exc))})
+        finally:
+            WORKFLOW_PROGRESS.reset(marker)
+            events.put(sentinel)
+    threading.Thread(target=run, daemon=True).start()
+    def body():
+        while True:
+            event = events.get()
+            if event is sentinel: break
+            yield f"event: {event.get('event', 'progress')}\ndata: {json.dumps(event, ensure_ascii=False)}\n\n"
+    return StreamingResponse(body(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 def parse_json_output(value: Any, label: str) -> dict:
@@ -221,6 +342,7 @@ def initial_retrieval_query(profile: dict, courses: list[dict]) -> str:
             f"quality={quality}; recovery=true; health_status={profile.get('healthStatus') or '未提供'}; "
             f"允许的知识库课程身份清单（courseKey｜title｜标准type｜level）：{allowed}。"
             "每条训练必须从清单选择真实课程身份；courseKey和title必须逐字照抄同一条目，type须与标准type一致。"
+            "title只填写清单中的课程名，不要把courseKey拼入title；课程编号和课程名由不同字段分别提供。"
             "知识库检索结果用于决定课程结构、时长和规则，不得把文档ID、文件名、知识库名称当作课程ID或课程名。")
 
 
@@ -244,6 +366,7 @@ def plan_from_dify(db, user_id: str, profile: dict):
     if not isinstance(workouts, list) or not 8 <= weeks <= 12 or days != int(profile["trainDays"]):
         raise HTTPException(status_code=502, detail="Dify 首次计划未满足周期或训练天数约束")
     normalized = []
+    ranges_by_position = {}
     type_map = {"easy":"easy", "aerobic_base":"easy", "run_walk":"easy", "recovery":"recovery", "long":"long", "long_run":"long", "quality":"quality", "strides":"quality", "tempo":"tempo", "interval":"interval", "rest":"rest", "other":"other"}
     for item in workouts:
         if not isinstance(item, dict): raise HTTPException(status_code=502, detail="Dify 计划包含无效训练条目")
@@ -255,11 +378,17 @@ def plan_from_dify(db, user_id: str, profile: dict):
         duration, distance = item.get("durationMin"), item.get("distanceKm")
         course_key, course_name = str(item.get("courseKey") or "").strip(), str(item.get("title") or "").strip()
         catalog = db.execute(text("SELECT id,name,type FROM course_catalog WHERE source_key=:key AND is_active=TRUE"), {"key": course_key}).mappings().first()
+        # Dify sometimes repeats the courseKey in the title. Accept only this exact
+        # redundant prefix, then persist the canonical name from course_catalog.
+        if catalog and course_name == f"{course_key} {catalog['name']}":
+            course_name = catalog["name"]
         if not (1 <= week <= weeks and 1 <= day <= 7 and (duration or distance) and item.get("intensity") and workout_type
                 and catalog and course_name == catalog["name"]):
             raise HTTPException(status_code=502, detail="Dify 计划课程必须包含知识库中的有效 courseKey 和准确课程名")
         if catalog["type"] != workout_type:
             raise HTTPException(status_code=502, detail="Dify 计划课程类型与知识库课程不一致")
+        distance_min, distance_max, pace_range = workout_range_values(item, required=True)
+        ranges_by_position[(week, day)] = (distance_min, distance_max, pace_range)
         normalized.append((week, day, workout_type))
     if len({(week, day) for week, day, _ in normalized}) != len(normalized):
         raise HTTPException(status_code=502, detail="Dify 计划重复安排了同一训练日期")
@@ -295,10 +424,12 @@ def plan_from_dify(db, user_id: str, profile: dict):
         week, day = int(item["week"]), int(item["day"])
         duration, distance = item.get("durationMin"), item.get("distanceKm")
         workout_type = type_map[str(item["type"]).lower()]
-        db.execute(text("""INSERT INTO workout(id,plan_id,course_id,week_no,day_no,type,title,duration_min,distance_km,intensity,talk_test,purpose,prerequisite,downgrade_rule,status)
-          VALUES(:id,:plan,:course,:week,:day,:type,:title,:duration,:distance,:intensity,:talk,:purpose,:prerequisite,:down,'scheduled')"""), {
+        distance_min, distance_max, pace_range = ranges_by_position[(week, day)]
+        db.execute(text("""INSERT INTO workout(id,plan_id,course_id,week_no,day_no,type,title,duration_min,distance_km,distance_min_km,distance_max_km,pace_range_min_per_km,intensity,talk_test,purpose,prerequisite,downgrade_rule,status)
+          VALUES(:id,:plan,:course,:week,:day,:type,:title,:duration,:distance,:distance_min,:distance_max,:pace,:intensity,:talk,:purpose,:prerequisite,:down,'scheduled')"""), {
             "id": uid(), "plan": plan_id, "course": db.execute(text("SELECT id FROM course_catalog WHERE source_key=:key"), {"key": item["courseKey"]}).scalar_one(), "week": week, "day": day, "type": workout_type,
-            "title": str(item["title"])[:160], "duration": duration, "distance": distance,
+            "title": str(item["title"])[:160], "duration": duration, "distance": distance, "distance_min": distance_min,
+            "distance_max": distance_max, "pace": pace_range,
             "intensity": str(item["intensity"])[:120], "talk": str(item.get("talkTest") or ""),
             "purpose": str(item.get("purpose") or ""), "prerequisite": str(item.get("prerequisite") or ""),
             "down": str(item.get("downgradeRule") or ""),
@@ -384,10 +515,45 @@ def generate_plan(user=Depends(current_user), idempotency_key: str | None = Head
         return {"plan": plan_payload(db, plan)}
 
 
+@app.post("/api/plans/generate/stream")
+def generate_plan_stream(user=Depends(current_user), idempotency_key: str | None = Header(default=None, alias="Idempotency-Key")):
+    return workflow_stream(lambda: generate_plan(user, idempotency_key))
+
+
 @app.get("/api/plans/active")
 def active_plan(user=Depends(current_user)):
     with Session() as db:
         return {"plan": plan_payload(db, get_active_plan(db, user["id"]))}
+
+
+@app.get("/api/plans/adjustments/latest")
+def latest_plan_adjustment(user=Depends(current_user)):
+    with Session() as db:
+        run = db.execute(text("""SELECT related_plan_id,related_feedback_id
+          FROM ai_workflow_run
+          WHERE user_id=:uid AND workflow_type='plan_adjust' AND status='succeeded' AND related_plan_id IS NOT NULL
+          ORDER BY COALESCE(finished_at,created_at) DESC LIMIT 1"""), {"uid": user["id"]}).mappings().first()
+        if not run:
+            return {"plan": plan_payload(db, get_active_plan(db, user["id"])), "previousPlan": None,
+                    "adjustment": None, "feedbackAnalysis": ""}
+        adjusted_plan = db.execute(text("SELECT * FROM training_plan WHERE id=:id AND user_id=:uid"), {
+            "id": run["related_plan_id"], "uid": user["id"],
+        }).mappings().first()
+        if not adjusted_plan:
+            return {"plan": None, "previousPlan": None, "adjustment": None, "feedbackAnalysis": ""}
+        previous_plan = db.execute(text("SELECT * FROM training_plan WHERE user_id=:uid AND version=:version"), {
+            "uid": user["id"], "version": max(0, int(adjusted_plan["version"]) - 1),
+        }).mappings().first()
+        feedback = db.execute(text("SELECT analysis_result FROM training_feedback WHERE id=:id AND user_id=:uid"), {
+            "id": run["related_feedback_id"], "uid": user["id"],
+        }).first() if run["related_feedback_id"] else None
+        adjustment = json_value(feedback[0]) if feedback and feedback[0] else None
+        return {
+            "plan": plan_payload(db, adjusted_plan),
+            "previousPlan": plan_payload(db, previous_plan),
+            "adjustment": adjustment,
+            "feedbackAnalysis": str((adjustment or {}).get("feedback_analysis") or ""),
+        }
 
 
 @app.get("/api/workouts/today")
@@ -396,12 +562,13 @@ def today_workout(user=Depends(current_user)):
         plan = get_active_plan(db, user["id"])
         if not plan:
             return {"workout": None}
-        row = db.execute(text("""SELECT w.*,c.source_key FROM workout w LEFT JOIN course_catalog c ON c.id=w.course_id
+        row = db.execute(text("""SELECT w.*,c.source_key,c.content AS course_content FROM workout w LEFT JOIN course_catalog c ON c.id=w.course_id
           WHERE w.plan_id=:pid AND w.status IN ('scheduled','in_progress')
           ORDER BY w.week_no,w.day_no LIMIT 1"""), {"pid": plan["id"]}).mappings().first()
         if not row:
             return {"workout": None}
-        return {"workout": {"id": row["id"], "week": row["week_no"], "day": row["day_no"], "type": row["type"], "title": row["title"], "courseName": row["title"], "courseId": row["course_id"], "courseKey": row["source_key"], "durationMin": row["duration_min"], "distanceKm": float(row["distance_km"]) if row["distance_km"] else None, "intensity": row["intensity"], "talkTest": row["talk_test"], "status": row["status"]}}
+        distance_range, pace_range = workout_range_payload(row)
+        return {"workout": {"id": row["id"], "week": row["week_no"], "day": row["day_no"], "type": row["type"], "title": row["title"], "courseName": row["title"], "courseId": row["course_id"], "courseKey": row["source_key"], "durationMin": row["duration_min"], "distanceKm": float(row["distance_km"]) if row["distance_km"] else None, "distanceRangeKm": distance_range, "paceRangeMinPerKm": pace_range, "intensity": row["intensity"], "talkTest": row["talk_test"], "status": row["status"]}}
 
 
 @app.post("/api/workouts/{workout_id}/start")
@@ -444,42 +611,61 @@ def clone_plan_with_dify_adjustment(db, user_id: str, old_plan, ai_result: dict)
       VALUES(:id,:uid,:version,'active',:title,:goal,:target,:weeks,:days,:source,:summary,:snapshot)"""), {
         "id": new_id, "uid": user_id, "version": version, "title": old_plan["title"], "goal": old_plan["goal"],
         "target": old_plan["target_minutes"], "weeks": old_plan["weeks"], "days": old_plan["train_days"],
-        "source": "dify", "summary": str(ai_result.get("reason") or "由 Dify 训练反馈调整工作流生成。"),
+        "source": "dify", "summary": "由 Dify 训练反馈调整工作流生成。",
         "snapshot": old_plan["profile_snapshot"],
     })
     old_workouts = db.execute(text("SELECT * FROM workout WHERE plan_id=:id ORDER BY week_no,day_no"), {"id": old_plan["id"]}).mappings().all()
     for item in old_workouts:
-        db.execute(text("""INSERT INTO workout(id,plan_id,course_id,week_no,day_no,type,title,duration_min,distance_km,intensity,talk_test,purpose,prerequisite,downgrade_rule,status,started_at)
-          VALUES(:id,:plan,:course,:week,:day,:type,:title,:duration,:distance,:intensity,:talk,:purpose,:prerequisite,:down,:status,:started)"""), {
+        db.execute(text("""INSERT INTO workout(id,plan_id,course_id,week_no,day_no,type,title,duration_min,distance_km,distance_min_km,distance_max_km,pace_range_min_per_km,intensity,talk_test,purpose,prerequisite,downgrade_rule,status,started_at)
+          VALUES(:id,:plan,:course,:week,:day,:type,:title,:duration,:distance,:distance_min,:distance_max,:pace,:intensity,:talk,:purpose,:prerequisite,:down,:status,:started)"""), {
             "id": uid(), "plan": new_id, "course": item["course_id"], "week": item["week_no"], "day": item["day_no"],
             "type": item["type"], "title": item["title"], "duration": item["duration_min"], "distance": item["distance_km"],
+            "distance_min": item["distance_min_km"], "distance_max": item["distance_max_km"], "pace": item["pace_range_min_per_km"],
             "intensity": item["intensity"], "talk": item["talk_test"], "purpose": item["purpose"],
             "prerequisite": item["prerequisite"], "down": item["downgrade_rule"],
             "status": "scheduled" if item["status"] == "in_progress" else item["status"],
             "started": None if item["status"] == "in_progress" else item["started_at"],
         })
-    for item in ai_result.get("workouts", []):
+    adjustment_items = ai_result.get("workouts", [])
+    if not adjustment_items and ai_result.get("status") in {"rest", "medical_review"}:
+        # Some published Dify runs place explicit rest/cancellation entries in
+        # planChanges while leaving workouts empty. Treat those entries as the
+        # actual, scope-checked workout changes.
+        adjustment_items = ai_result.get("planChanges", [])
+    for item in adjustment_items:
         row = db.execute(text("SELECT id,type FROM workout WHERE plan_id=:pid AND week_no=:week AND day_no=:day AND status='scheduled'"), {
             "pid": new_id, "week": int(item["week"]), "day": int(item["day"]),
         }).mappings().first()
         if not row:
             raise HTTPException(status_code=502, detail="Dify 调整返回了不存在或已完成的训练日期")
+        cancel_for_rest = (
+            ai_result.get("status") in {"rest", "medical_review"}
+            and item.get("durationMin") in (0, 0.0, "0")
+            and item.get("distanceKm") in (None, 0, 0.0, "0")
+        )
         raw_type = str(item.get("type") or row["type"]).lower()
         typ = {"easy":"easy", "aerobic_base":"easy", "run_walk":"easy", "recovery":"recovery", "long":"long", "long_run":"long", "quality":"quality", "strides":"quality", "tempo":"tempo", "interval":"interval", "rest":"rest", "other":"other"}.get(raw_type)
         if not typ:
             raise HTTPException(status_code=502, detail="Dify 调整返回了不支持的课程类型")
-        if not item.get("durationMin") and not item.get("distanceKm"):
+        if not cancel_for_rest and not (item.get("durationMin") or item.get("distanceKm")):
             raise HTTPException(status_code=502, detail="Dify 调整训练缺少时长或距离")
         course_key = str(item.get("courseKey") or "").strip()
         course_name = str(item.get("title") or "").strip()
-        catalog = db.execute(text("SELECT id,name,type FROM course_catalog WHERE source_key=:key AND is_active=TRUE"), {"key": course_key}).mappings().first()
+        catalog = db.execute(text("SELECT id,name,type,content FROM course_catalog WHERE source_key=:key AND is_active=TRUE"), {"key": course_key}).mappings().first()
         if not catalog or catalog["name"] != course_name or catalog["type"] != typ:
             raise HTTPException(status_code=502, detail="Dify 调整课程必须匹配知识库中的 courseKey、课程名和课程类型")
+        if cancel_for_rest:
+            distance_min = distance_max = pace_range = None
+        else:
+            distance_min, distance_max, pace_range = workout_range_values(item, catalog["content"], required=False)
         db.execute(text("""UPDATE workout SET course_id=:course,type=:type,title=:title,duration_min=:duration,distance_km=:distance,
-          intensity=:intensity,talk_test=:talk,purpose=:purpose,downgrade_rule=:down WHERE id=:id"""), {
-            "id": row["id"], "course": catalog["id"], "title": catalog["name"], "type": typ, "duration": item.get("durationMin"), "distance": item.get("distanceKm"),
-            "intensity": str(item.get("intensity") or "")[:120], "talk": str(item.get("talkTest") or ""),
+          distance_min_km=:distance_min,distance_max_km=:distance_max,pace_range_min_per_km=:pace,
+          intensity=:intensity,talk_test=:talk,purpose=:purpose,downgrade_rule=:down,status=:status WHERE id=:id"""), {
+            "id": row["id"], "course": catalog["id"], "title": catalog["name"], "type": typ, "duration": 0 if cancel_for_rest else item.get("durationMin"), "distance": None if cancel_for_rest else item.get("distanceKm"),
+            "distance_min": distance_min, "distance_max": distance_max, "pace": pace_range,
+            "intensity": "休息" if cancel_for_rest else str(item.get("intensity") or "")[:120], "talk": str(item.get("talkTest") or ""),
             "purpose": str(item.get("note") or item.get("purpose") or ""), "down": str(item.get("downgradeRule") or ""),
+            "status": "skipped" if cancel_for_rest else "scheduled",
         })
     return db.execute(text("SELECT * FROM training_plan WHERE id=:id"), {"id": new_id}).mappings().first()
 
@@ -489,6 +675,8 @@ def save_feedback(record_id: str, payload: Feedback, user=Depends(current_user))
     if payload.completion not in ("completed", "partial", "missed", "unknown"):
         raise HTTPException(status_code=422, detail="完成情况不合法")
     feedback_id = uid()
+    discomfort = payload.pain >= 3
+    discomfort_parts: list[str] = []
     with Session.begin() as db:
         record = db.execute(text("SELECT id FROM training_record WHERE id=:id AND user_id=:uid"), {"id": record_id, "uid": user["id"]}).first()
         if not record:
@@ -500,7 +688,7 @@ def save_feedback(record_id: str, payload: Feedback, user=Depends(current_user))
           VALUES(:id,:record,:uid,:completion,:subjective,:physical,:pain,:discomfort,:parts,:note,NULL)"""), {
             "id": feedback_id, "record": record_id, "uid": user["id"], "completion": payload.completion,
             "subjective": payload.subjective, "physical": payload.physical, "pain": payload.pain,
-            "discomfort": payload.discomfort, "parts": json.dumps(payload.discomfortParts, ensure_ascii=False),
+            "discomfort": discomfort, "parts": json.dumps(discomfort_parts, ensure_ascii=False),
             "note": payload.note,
         })
     return {"feedbackId": feedback_id, "analysis": None}
@@ -509,7 +697,8 @@ def save_feedback(record_id: str, payload: Feedback, user=Depends(current_user))
 @app.post("/api/training-records/{record_id}/adjust-plan")
 def adjust_plan(record_id: str, user=Depends(current_user)):
     with Session.begin() as db:
-        row = db.execute(text("""SELECT f.*,r.workout_id FROM training_feedback f JOIN training_record r ON r.id=f.training_record_id
+        row = db.execute(text("""SELECT f.*,r.workout_id,r.actual_distance_km,r.actual_duration_min,r.pace_seconds_per_km
+          FROM training_feedback f JOIN training_record r ON r.id=f.training_record_id
           WHERE f.training_record_id=:rid AND f.user_id=:uid"""), {"rid": record_id, "uid": user["id"]}).mappings().first()
         if not row:
             raise HTTPException(status_code=409, detail="请先提交训练反馈")
@@ -517,7 +706,9 @@ def adjust_plan(record_id: str, user=Depends(current_user)):
         if previous_run and previous_run[0]:
             plan = db.execute(text("SELECT * FROM training_plan WHERE id=:id"), {"id": previous_run[0]}).mappings().first()
             cached_outputs = json_value(previous_run[1]) or {}
-            return {"plan": plan_payload(db, plan), "adjustment": json_value(row["analysis_result"]), "feedbackAnalysis": str(cached_outputs.get("feedback_analysis") or ""), "warmupStretchSources": cached_outputs.get("warmup_stretch_sources", [])}
+            cached_adjustment = json_value(row["analysis_result"]) or {}
+            feedback_analysis = cached_adjustment.get("feedback_analysis") or ""
+            return {"plan": plan_payload(db, plan), "adjustment": cached_adjustment or None, "feedbackAnalysis": str(feedback_analysis), "warmupStretchSources": cached_outputs.get("warmup_stretch_sources", [])}
         active = get_active_plan(db, user["id"])
         if not active:
             raise HTTPException(status_code=409, detail="当前没有可调整的计划")
@@ -540,13 +731,19 @@ def adjust_plan(record_id: str, user=Depends(current_user)):
             "completion": row["completion"], "subjective": row["subjective"], "physical": row["physical"],
             "pain": row["pain"], "discomfort": bool(row["discomfort"]),
             "discomfortParts": json_value(row["discomfort_parts"]), "note": row["note"],
+            "completed": {
+                "distanceKm": float(row["actual_distance_km"]) if row["actual_distance_km"] is not None else None,
+                "durationMin": float(row["actual_duration_min"]) if row["actual_duration_min"] is not None else None,
+                "pace": (f"{int(row['pace_seconds_per_km']) // 60}:{int(row['pace_seconds_per_km']) % 60:02d} min/km"
+                         if row["pace_seconds_per_km"] is not None else None),
+            },
         }
         outputs = dify_workflow(DIFY_ADJUST_API_KEY, "训练反馈调整", {
             "current_plan": json.dumps(current_plan, ensure_ascii=False),
             "training_feedback": json.dumps(feedback, ensure_ascii=False),
         }, user["id"])
         ai_result = parse_json_output(outputs.get("adjusted_plan"), "训练调整")
-        feedback_analysis = str(outputs.get("feedback_analysis") or "")
+        feedback_analysis = str(ai_result.get("feedback_analysis") or "")
         valid_status = {"maintain","progress","reduce","recovery","rest","medical_review"}
         valid_scope = {"none","next_1","next_2","next_3","current_week"}
         if (ai_result.get("status") not in valid_status or ai_result.get("adjustmentScope") not in valid_scope
@@ -555,24 +752,33 @@ def adjust_plan(record_id: str, user=Depends(current_user)):
         scope = ai_result["adjustmentScope"]
         target_rows = current_plan["adjustmentTargets"].get(scope, [])
         target_days = {(int(item["week"]), int(item["day"])) for item in target_rows}
+        adjustment_items = ai_result["workouts"]
+        if not adjustment_items and ai_result["status"] in {"rest", "medical_review"}:
+            adjustment_items = ai_result["planChanges"]
         def is_in_scope(item):
             try:
                 return isinstance(item, dict) and (int(item.get("week", 0)), int(item.get("day", 0))) in target_days
             except (TypeError, ValueError):
                 return False
-        if any(not is_in_scope(item) for item in ai_result["workouts"]):
+        if any(not is_in_scope(item) for item in adjustment_items):
             raise HTTPException(status_code=502, detail="Dify 调整课程超出了反馈分析指定的训练范围")
-        if ai_result["status"] not in {"maintain", "rest"} and scope != "none" and not ai_result["workouts"]:
+        if ai_result["status"] not in {"maintain", "rest"} and scope != "none" and not adjustment_items:
             raise HTTPException(status_code=502, detail="Dify 调整状态要求变更课程，但未返回受影响训练")
-        for item in ai_result["workouts"]:
+        for item in adjustment_items:
             if not isinstance(item, dict):
                 raise HTTPException(status_code=502, detail="Dify 训练调整包含无效训练条目")
             try:
                 week, day = int(item["week"]), int(item["day"])
             except (KeyError, TypeError, ValueError):
                 raise HTTPException(status_code=502, detail="Dify 调整训练缺少有效 week/day")
+            cancel_for_rest = (
+                ai_result.get("status") in {"rest", "medical_review"}
+                and item.get("durationMin") in (0, 0.0, "0")
+                and item.get("distanceKm") in (None, 0, 0.0, "0")
+            )
+            has_positive_target = bool(item.get("durationMin") or item.get("distanceKm"))
             if not (1 <= week <= int(active["weeks"]) and 1 <= day <= 7 and item.get("type") and item.get("intensity")
-                    and (item.get("durationMin") or item.get("distanceKm"))):
+                    and (has_positive_target or cancel_for_rest)):
                 raise HTTPException(status_code=502, detail="Dify 调整训练条目缺少课程类型、目标或强度")
         plan = clone_plan_with_dify_adjustment(db, user["id"], active, ai_result)
         adjustment = ai_result
@@ -589,9 +795,31 @@ def adjust_plan(record_id: str, user=Depends(current_user)):
         return {"plan": plan_payload(db, plan), "adjustment": adjustment, "feedbackAnalysis": feedback_analysis, "warmupStretchSources": outputs.get("warmup_stretch_sources", [])}
 
 
+@app.post("/api/training-records/{record_id}/adjust-plan/stream")
+def adjust_plan_stream(record_id: str, user=Depends(current_user)):
+    return workflow_stream(lambda: adjust_plan(record_id, user))
+
+
 @app.get("/api/me")
 def me(user=Depends(current_user)):
     return {"account": user["account"]}
+
+
+@app.delete("/api/me/account")
+def delete_account(user=Depends(current_user)):
+    with Session.begin() as db:
+        exists = db.execute(text("SELECT id FROM app_user WHERE id=:uid FOR UPDATE"), {"uid": user["id"]}).first()
+        if not exists:
+            raise HTTPException(status_code=404, detail="账号不存在或已注销")
+        # Remove only this account's records in dependency order; the shared course catalog remains intact.
+        db.execute(text("DELETE FROM training_feedback WHERE user_id=:uid"), {"uid": user["id"]})
+        db.execute(text("DELETE FROM training_record WHERE user_id=:uid"), {"uid": user["id"]})
+        db.execute(text("DELETE FROM ai_workflow_run WHERE user_id=:uid"), {"uid": user["id"]})
+        db.execute(text("DELETE FROM workout WHERE plan_id IN (SELECT id FROM training_plan WHERE user_id=:uid)"), {"uid": user["id"]})
+        db.execute(text("DELETE FROM training_plan WHERE user_id=:uid"), {"uid": user["id"]})
+        db.execute(text("DELETE FROM runner_profile WHERE user_id=:uid"), {"uid": user["id"]})
+        db.execute(text("DELETE FROM app_user WHERE id=:uid"), {"uid": user["id"]})
+    return {"deleted": True}
 
 
 frontend_dir = Path(os.environ.get("FRONTEND_DIR", "../003.前端代码/frontend")).resolve()

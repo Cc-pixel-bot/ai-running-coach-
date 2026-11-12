@@ -35,6 +35,42 @@
     if (!response.ok) throw new Error(data.detail || `请求失败（${response.status}）`);
     return data;
   }
+  async function streamApi(path, options = {}, onProgress = () => {}) {
+    const headers = { 'Content-Type': 'application/json', Accept: 'text/event-stream', ...(options.headers || {}) };
+    if (token()) headers.Authorization = `Bearer ${token()}`;
+    const response = await fetch(`/api${path}`, { ...options, headers });
+    if (!response.ok) { const error = await response.json().catch(() => ({})); throw new Error(error.detail || `请求失败（${response.status}）`); }
+    const reader = response.body.getReader(); const decoder = new TextDecoder(); let buffer = '', result = null;
+    while (true) {
+      const { value: chunk, done } = await reader.read(); buffer += decoder.decode(chunk || new Uint8Array(), { stream: !done });
+      const frames = buffer.split(/\r?\n\r?\n/); buffer = frames.pop();
+      for (const frame of frames) {
+        const event = frame.match(/^event:\s*(.+)$/m)?.[1]?.trim(); const dataLine = frame.match(/^data:\s*(.+)$/m)?.[1];
+        if (!dataLine) continue;
+        const data = JSON.parse(dataLine);
+        if (event === 'progress' || event === 'workflow_started' || event === 'node_started' || event === 'node_finished') onProgress(data);
+        else if (event === 'result') result = data.data;
+        else if (event === 'error') throw new Error(data.message || 'Dify 工作流执行失败');
+      }
+      if (done) break;
+    }
+    if (!result) throw new Error('工作流未返回结果');
+    return result;
+  }
+  function courseName(workout) {
+    const name = workout?.courseName || workout?.title || '课程';
+    const key = workout?.courseKey || workout?.courseId;
+    return String(name).replace(key ? new RegExp(`^${String(key).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*[·•-]?\\s*`) : /^E-\d+\s*[·•-]?\s*/i, '').replace(/^E-\d+\s*[·•-]?\s*/i, '').trim();
+  }
+  function distanceRangeText(workout) {
+    const range = workout?.distanceRangeKm;
+    if (Array.isArray(range) && range.length === 2 && range.every((value) => Number.isFinite(Number(value)))) return `${Number(range[0]).toFixed(1)}–${Number(range[1]).toFixed(1)} km`;
+    return workout?.distanceKm != null ? `${workout.distanceKm} km` : '';
+  }
+  function paceRangeText(workout) { return typeof workout?.paceRangeMinPerKm === 'string' ? workout.paceRangeMinPerKm.trim() : ''; }
+  function workoutTargetText(workout) {
+    return [distanceRangeText(workout) ? `距离 ${distanceRangeText(workout)}` : '', paceRangeText(workout) ? `配速 ${paceRangeText(workout)}` : '', workout?.durationMin != null ? `${workout.durationMin} 分钟` : ''].filter(Boolean).join(' · ');
+  }
   if (page !== 'login' && !token()) { window.location.replace(encodeURI(pageFiles[1])); return; }
   function go(number) {
     const file = pageFiles[number];
@@ -187,10 +223,10 @@
     document.querySelector('.action button')?.addEventListener('click', () => {
       const fields = [
         ['longest-run', (v) => Number.isFinite(Number(v)) && Number(v) >= 5 && Number(v) <= 20, '最长连续跑距离需为 5–20 公里'],
-        ['latest-10k', (v) => Number.isInteger(Number(v)) && Number(v) >= 40 && Number(v) <= 80, '10km 成绩需为 40–80 分钟的整数'],
+        ['latest-10k', (v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 40 && Number(v) <= 80), '10km 成绩需为 40–80 分钟的整数'],
         ['train-days', (v) => Number.isInteger(Number(v)) && Number(v) >= 3 && Number(v) <= 7, '每周训练天数需为 3–7 天的整数']
       ];
-      for (const [id, valid, message] of fields) { const el = document.getElementById(id); const v = value(id); if (!v || !valid(v)) { el.setCustomValidity(message); el.reportValidity(); el.setCustomValidity(''); return; } }
+      for (const [id, valid, message] of fields) { const el = document.getElementById(id); const v = value(id); if ((id !== 'latest-10k' && !v) || !valid(v)) { el.setCustomValidity(message); el.reportValidity(); el.setCustomValidity(''); return; } }
       fields.forEach(([id]) => profile()[id] = value(id)); save(); go(5);
     });
   }
@@ -229,16 +265,19 @@
     const summaries = [
       p.height && p.weight ? `${p.height} cm · ${p.weight} kg` : '',
       p.goal || '',
-      p['longest-run'] ? `最长连续跑 ${p['longest-run']} km<br>最近一次10km ${p['latest-10k'] || ''} 分钟<br>每周可训练 ${p['train-days'] || ''} 天` : '',
+      p['longest-run'] ? `最长连续跑 ${p['longest-run']} km<br>最近一次10km ${p['latest-10k'] ? `${p['latest-10k']} 分钟` : '未填写'}<br>每周可训练 ${p['train-days'] || ''} 天` : '',
       p.targetMinutes ? `${p.targetMinutes} 分钟` : '',
       Array.isArray(p.health) && p.health.length ? p.health.join('、') : ''
     ];
+    const readOnly = new URLSearchParams(location.search).get('readonly') === '1';
+    if (readOnly) { document.querySelector('.back')?.remove(); document.querySelector('.action')?.remove(); }
     const editPages = [2, 3, 4, 5, 6];
     document.querySelectorAll('.profile-row').forEach((row, index) => {
       if (index === 2) row.classList.add('profile-running-row');
       const valueNode = row.querySelector('.profile-value'); const edit = row.querySelector('.edit');
       if (valueNode) { const text = document.createElement('span'); text.className = 'profile-summary'; text.innerHTML = summaries[index]; valueNode.insertBefore(text, valueNode.firstChild); }
-      if (edit) { edit.setAttribute('role', 'button'); edit.tabIndex = 0; edit.dataset.route = String(editPages[index]); }
+      if (edit && readOnly) edit.remove();
+      else if (edit) { edit.setAttribute('role', 'button'); edit.tabIndex = 0; edit.dataset.route = String(editPages[index]); }
     });
     document.querySelector('.action button')?.addEventListener('click', () => {
       if (!p.goal || !p.height || !p.weight || !p['longest-run'] || !p['train-days'] || !p.targetMinutes || !p.health?.length) { notify('请先完成所有建档信息。'); return; }
@@ -252,23 +291,43 @@
     const cta = document.getElementById('ctaBtn');
     if (cta) cta.disabled = true;
     const steps = [...document.querySelectorAll('main h4')];
-    const setProgress = (done) => steps.forEach((heading, index) => {
-      const box = heading.closest('.flex.items-start');
-      const status = box?.querySelector('span[class*="text-[10px]"]');
-      if (status) status.textContent = done ? '已完成' : index === 0 ? '进行中' : '等待中';
+    const nodeTitles = page === 'plan-adjust'
+      ? [['用户输入'], ['分析训练反馈', '检索调整规则'], ['调整后续训练'], ['检索热身与拉伸动作', '输出调整结果']]
+      : [['用户输入'], ['检索10km课程'], ['组合首次训练计划'], ['输出']];
+    const finishedNodes = new Set(); let activeStep = 0;
+    const flowGlyphs = ['person_search', 'travel_explore', 'event_note', 'fact_check'];
+    const setProgress = (current = -1, allDone = false) => steps.forEach((heading, index) => {
+      const box = heading.closest('.flex.items-start'); const status = box?.querySelector('span[class*="text-[10px]"]');
+      if (!box) return;
+      const icon = box.querySelector('[data-flow-icon]') || box.firstElementChild;
+      if (icon && !icon.dataset.flowIcon) { icon.dataset.flowIcon = '1'; icon.innerHTML = ''; const glyph = document.createElement('span'); glyph.className = 'material-symbols-outlined'; glyph.dataset.glyph = '1'; icon.append(glyph); }
+      const done = allDone || (nodeTitles[index] || []).every((title) => finishedNodes.has(title));
+      const active = !done && index === current;
+      if (icon) { icon.className = `flow-icon ${done ? 'is-done' : active ? 'is-active' : 'is-pending'}`; icon.querySelector('[data-glyph]').textContent = flowGlyphs[index]; }
+      if (status) { status.textContent = done ? '已完成' : active ? '进行中' : '等待中'; status.className = `text-[10px] px-1.5 py-0.5 rounded font-medium border flow-status ${done ? 'is-done' : active ? 'is-active' : 'is-pending'}`; }
     });
-    setProgress(false);
+    setProgress(-1);
     if (page === 'plan-generation') state.planRequestKey ||= crypto.randomUUID();
     let taskSucceeded = false;
     const task = page === 'plan-adjust'
-      ? api(`/training-records/${state.trainingRecordId}/adjust-plan`, { method: 'POST' })
-      : api('/plans/generate', { method: 'POST', headers: { 'Idempotency-Key': state.planRequestKey } });
+      ? streamApi(`/training-records/${state.trainingRecordId}/adjust-plan/stream`, { method: 'POST' }, (event) => {
+          if (event.event === 'node_finished') finishedNodes.add(event.title);
+          const idx = event.event === 'workflow_started' ? 0 : nodeTitles.findIndex((group) => group.includes(event.title));
+          if (idx >= 0) activeStep = event.event === 'node_finished' && nodeTitles[idx].every((title) => finishedNodes.has(title)) ? Math.min(idx + 1, steps.length - 1) : idx;
+          setProgress(activeStep);
+        })
+      : streamApi('/plans/generate/stream', { method: 'POST', headers: { 'Idempotency-Key': state.planRequestKey } }, (event) => {
+          if (event.event === 'node_finished') finishedNodes.add(event.title);
+          const idx = event.event === 'workflow_started' ? 0 : nodeTitles.findIndex((group) => group.includes(event.title));
+          if (idx >= 0) activeStep = event.event === 'node_finished' && nodeTitles[idx].every((title) => finishedNodes.has(title)) ? Math.min(idx + 1, steps.length - 1) : idx;
+          setProgress(activeStep);
+        });
     if (page === 'plan-adjust') state.previousPlan = state.activePlan;
     task.then((result) => {
       taskSucceeded = true; state.activePlan = result.plan;
       if (page === 'plan-adjust') { state.adjustment = result.adjustment || null; state.feedbackAnalysis = result.feedbackAnalysis || ''; state.warmupStretchSources = result.warmupStretchSources || []; }
-      if (page === 'plan-generation') delete state.planRequestKey; save(); setProgress(true);
-      if (cta) { cta.disabled = false; const label = cta.querySelector('span:last-child'); if (label) label.textContent = page === 'plan-adjust' ? '查看调整结果' : '查看训练计划'; const spinner = cta.querySelector('.animate-spin'); if (spinner) spinner.textContent = '✓'; }
+      if (page === 'plan-generation') delete state.planRequestKey; save(); setProgress(-1, true);
+      if (cta) { cta.disabled = false; const label = cta.querySelector('span:last-child'); if (label) label.textContent = page === 'plan-adjust' ? '查看调整结果' : '查看训练计划'; cta.querySelector('.animate-spin')?.remove(); }
     }).catch((error) => {
       if (cta) { cta.disabled = false; const label = cta.querySelector('span:last-child'); if (label) label.textContent = '重试'; }
       notify(error.message);
@@ -286,10 +345,11 @@
             delete state.trainingRecordId; delete state.feedbackId; delete state.feedbackAnalysis; delete state.feedback; delete state.run;
           }
           state.workoutId = workout.id; save();
-          const title = document.querySelector('.today-card h2'); if (title) title.textContent = `${workout.courseKey || '课程'} · ${workout.courseName || workout.title}`;
+          const title = document.querySelector('.today-card h2'); if (title) title.textContent = courseName(workout);
           const metrics = document.querySelectorAll('.today-metrics .metric strong');
-          if (metrics[0]) metrics[0].innerHTML = `${workout.distanceKm ?? '—'} <small>km</small>`;
-          if (metrics[2]) metrics[2].innerHTML = `${workout.durationMin ?? '—'} <small>分</small>`;
+          if (metrics[0]) metrics[0].textContent = distanceRangeText(workout) || '按课程安排';
+          if (metrics[1]) metrics[1].textContent = (paceRangeText(workout).replace(/\s*min\s*\/\s*km\s*$/i, ' /km')) || '按 RPE';
+          if (metrics[2]) metrics[2].textContent = workout.durationMin != null ? `${workout.durationMin} 分钟` : '—';
         }).catch((error) => notify(error.message));
       }
       if (page === 'plan-overview') {
@@ -306,7 +366,10 @@
         const period = [...document.querySelectorAll('main span')].find((el) => el.textContent.trim() === '计划周期');
         if (period?.parentElement?.lastElementChild) period.parentElement.lastElementChild.textContent = `共 ${plan.weeks} 周`;
         const frequency = [...document.querySelectorAll('main span')].find((el) => el.textContent.trim() === '频次 & 总量');
-        if (frequency?.parentElement?.lastElementChild) frequency.parentElement.lastElementChild.textContent = `每周最多 ${plan.trainDays} 次 · ${total} 节训练`;
+        if (frequency?.parentElement?.lastElementChild) {
+          const value = frequency.parentElement.lastElementChild;
+          value.textContent = `每周 ${plan.trainDays} 次 · 共 ${total} 节`;
+        }
         const timeline = document.querySelector('main .relative.flex.flex-col.pl-2');
         if (timeline) {
           timeline.replaceChildren();
@@ -322,16 +385,18 @@
             summaryInner.append(weekName, count); summary.append(badge, summaryInner);
             const body = document.createElement('div'); body.className = 'ml-[18px] pl-6 pt-1.5 flex flex-col';
             rows.forEach((w) => {
-              const row = document.createElement('div'); row.className = `relative ${w.status === 'in_progress' ? 'py-3' : 'py-2.5'} flex items-center justify-between gap-3 whitespace-nowrap`;
-              const dot = document.createElement('div'); dot.className = `absolute -left-[28px] top-1/2 -translate-y-1/2 ${w.status === 'in_progress' ? 'w-2.5 h-2.5 rounded-full bg-[#007AFF]' : 'w-2 h-2 rounded-full bg-[#C1C6D7]'} ring-2 ring-[#F8F9FA]`;
-              const labelWrap = document.createElement('div'); labelWrap.className = 'flex items-center gap-2.5 min-w-0 flex-1';
+              const row = document.createElement('div'); row.className = `relative ${w.status === 'in_progress' ? 'py-3' : 'py-2.5'} flex items-center justify-between gap-3`;
+              const dotColor = w.status === 'completed' ? 'bg-[#34C759]' : w.status === 'in_progress' ? 'bg-[#007AFF]' : 'bg-[#C1C6D7]';
+              const dot = document.createElement('div'); dot.className = `absolute -left-[28px] top-1/2 -translate-y-1/2 ${w.status === 'in_progress' ? 'w-2.5 h-2.5' : 'w-2 h-2'} rounded-full ${dotColor} ring-2 ring-[#F8F9FA]`;
+              const labelWrap = document.createElement('div'); labelWrap.className = 'flex flex-col items-start gap-1 min-w-0 flex-1';
+              const identity = document.createElement('div'); identity.className = 'flex items-center gap-2.5 min-w-0';
               const dayLabel = document.createElement('span'); dayLabel.className = `text-[12px] ${w.status === 'in_progress' ? 'font-bold text-[#007AFF]' : 'font-semibold text-[#86868B]'} shrink-0`; dayLabel.textContent = `Day ${w.day}`;
-              const name = document.createElement('span'); name.className = `text-[13px] ${w.status === 'in_progress' ? 'font-bold' : 'font-medium'} text-[#1D1D1F] truncate`; name.textContent = `${w.courseKey || w.courseId || '课程'} · ${w.courseName || w.title}`;
-              labelWrap.append(dayLabel, name);
+              const name = document.createElement('span'); name.className = `text-[13px] ${w.status === 'in_progress' ? 'font-bold' : 'font-medium'} text-[#1D1D1F] truncate`; name.textContent = courseName(w);
+              identity.append(dayLabel, name); labelWrap.append(identity);
+              const meta = document.createElement('span'); meta.className = 'text-[10px] text-[#86868B] whitespace-normal'; meta.textContent = workoutTargetText(w); labelWrap.append(meta);
               const right = document.createElement('div'); right.className = 'flex items-center gap-2 shrink-0';
-              const meta = document.createElement('span'); meta.className = 'text-[11px] text-[#86868B]'; meta.textContent = `${w.distanceKm != null ? `${w.distanceKm} km` : ''}${w.distanceKm != null && w.durationMin ? ' · ' : ''}${w.durationMin ? `${w.durationMin}分` : ''}`;
-              const stateLabel = document.createElement('span'); stateLabel.className = 'text-[11px] text-[#86868B]'; stateLabel.textContent = w.status === 'completed' ? '已完成' : w.status === 'in_progress' ? '进行中' : '待开始';
-              right.append(meta, stateLabel); row.append(dot, labelWrap, right);
+              const stateLabel = document.createElement('span'); stateLabel.className = 'text-[11px] text-[#86868B]'; stateLabel.textContent = w.status === 'completed' ? '已完成' : w.status === 'in_progress' ? '进行中' : w.status === 'skipped' ? '已取消 · 休息' : '待开始';
+              right.append(stateLabel); row.append(dot, labelWrap, right);
               if (w.status === 'scheduled' && !timeline.querySelector('[data-first-workout]')) { row.dataset.firstWorkout = 'true'; row.tabIndex = 0; row.setAttribute('role', 'button'); row.dataset.route = '11'; row.addEventListener('click', () => { state.workoutId = w.id; save(); }); }
               body.append(row);
             });
@@ -363,9 +428,9 @@
       }
       state.workoutId = workout.id; save();
       const title = document.querySelector('.workout-title');
-      if (title) title.textContent = `${workout.courseKey || '课程'} · ${workout.courseName || workout.title}`;
+       if (title) title.textContent = courseName(workout);
       const value = document.querySelector('[data-workout-value]');
-      if (value) value.textContent = workout.distanceKm != null ? `${workout.distanceKm} km` : `${workout.durationMin ?? '—'} 分钟`;
+      if (value) value.textContent = distanceRangeText(workout) || `${workout.durationMin ?? '—'} 分钟`;
     }).catch((error) => notify(error.message));
     document.querySelector('.primary-button')?.addEventListener('click', async (event) => {
     event.currentTarget.disabled = true;
@@ -415,20 +480,53 @@
     const stopButton = document.querySelector('.run-control-button.stop');
     const pauseButton = document.querySelector('.run-control-button.pause');
     const progressCircle = stopButton?.querySelector('.hold-progress');
-    let seconds = 0, paused = false;
+    const gpsBadge = document.querySelector('.run-top .pill');
+    let seconds = 0, paused = false, hasFix = false, lastPoint = null, distanceMeters = 0, watchId = null;
     let holdStart = 0, holdFrame = 0, runEnded = false;
     const holdDuration = 1700;
     const circumference = 2 * Math.PI * 36;
-    const timer = window.setInterval(() => { if (!paused) seconds += 1; const min = String(Math.floor(seconds / 60)).padStart(2, '0'); const sec = String(seconds % 60).padStart(2, '0'); if (metrics[1]) metrics[1].textContent = `${min}:${sec}`; if (distance) distance.textContent = (seconds * .00278).toFixed(2); if (metrics[0]) metrics[0].textContent = seconds ? `${Math.floor(360 + seconds / 60)}'00"` : '—'; }, 1000);
+    let activeStartedAt = 0, pausedAt = 0, pausedTotal = 0;
+    const setGps = (text, color = '#52dfbf') => { if (gpsBadge) { gpsBadge.textContent = `● ${text}`; gpsBadge.style.color = color; } };
+    const renderRun = () => {
+      seconds = hasFix ? Math.max(0, Math.floor(((paused ? pausedAt : Date.now()) - activeStartedAt - pausedTotal) / 1000)) : 0;
+      const min = String(Math.floor(seconds / 60)).padStart(2, '0'), sec = String(seconds % 60).padStart(2, '0');
+      const km = distanceMeters / 1000;
+      if (metrics[1]) metrics[1].textContent = `${min}:${sec}`;
+      if (distance) distance.textContent = km.toFixed(2);
+      if (metrics[0]) metrics[0].textContent = km > 0 && seconds > 0 ? `${Math.floor(seconds / 60 / km)}'${String(Math.floor(seconds / km) % 60).padStart(2, '0')}"` : '—';
+    };
+    const timer = window.setInterval(renderRun, 1000);
+    const radians = (degrees) => degrees * Math.PI / 180;
+    const metersBetween = (a, b) => { const dLat = radians(b.latitude - a.latitude), dLon = radians(b.longitude - a.longitude); const x = Math.sin(dLat / 2) ** 2 + Math.cos(radians(a.latitude)) * Math.cos(radians(b.latitude)) * Math.sin(dLon / 2) ** 2; return 6371000 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)); };
+    if (!navigator.geolocation) setGps('设备不支持GPS', '#ff6b6b');
+    else {
+      setGps('正在获取GPS…', '#f0b44d');
+      watchId = navigator.geolocation.watchPosition((position) => {
+        const point = position.coords;
+        if (point.accuracy > 35) { setGps(`GPS信号较弱 ±${Math.round(point.accuracy)}米`, '#f0b44d'); return; }
+        const current = { latitude: point.latitude, longitude: point.longitude, at: position.timestamp || Date.now() };
+        if (!hasFix) { hasFix = true; activeStartedAt = Date.now(); setGps('GPS已连接'); }
+        if (lastPoint && !paused) {
+          const meters = metersBetween(lastPoint, current), elapsed = Math.max(.2, (current.at - lastPoint.at) / 1000);
+          if (meters >= 2 && meters / elapsed <= 8) distanceMeters += meters;
+        }
+        lastPoint = current; renderRun();
+      }, (error) => {
+        const message = error.code === 1 ? '请允许定位权限' : error.code === 3 ? 'GPS定位超时，正在重试' : 'GPS暂不可用';
+        setGps(message, '#ff6b6b');
+      }, { enableHighAccuracy: true, maximumAge: 1000, timeout: 20000 });
+    }
     const finishRun = () => {
       if (runEnded) return;
       runEnded = true;
       window.cancelAnimationFrame(holdFrame);
       window.clearInterval(timer);
-      state.run = { seconds, distance: Number((seconds * .00278).toFixed(2)), completedAt: Date.now() };
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      renderRun();
+      state.run = { seconds, distance: Number((distanceMeters / 1000).toFixed(3)), completedAt: Date.now() };
       save();
-      const saveRun = state.trainingRecordId ? api(`/training-records/${state.trainingRecordId}/finish`, { method: 'POST', body: JSON.stringify({ distanceKm: state.run.distance, durationMin: Number((seconds / 60).toFixed(2)), completed: seconds > 0 }) }) : Promise.resolve();
-      saveRun.then(() => go(14)).catch((error) => notify(error.message));
+      const saveRun = state.trainingRecordId ? api(`/training-records/${state.trainingRecordId}/finish`, { method: 'POST', body: JSON.stringify({ distanceKm: state.run.distance, durationMin: Number((seconds / 60).toFixed(2)), completed: seconds > 0 && state.run.distance > 0 }) }) : Promise.resolve();
+      saveRun.then(() => go(14)).catch((error) => { notify(error.message); go(14); });
     };
     const updateHoldProgress = (now) => {
       if (!holdStart || runEnded) return;
@@ -459,38 +557,42 @@
     stopButton?.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') beginHold(event); });
     stopButton?.addEventListener('keyup', cancelHold);
     pauseButton?.addEventListener('click', () => {
+      if (!hasFix) { notify('等待GPS定位成功后才能开始训练。'); return; }
       paused = !paused;
+      if (paused) pausedAt = Date.now(); else { pausedTotal += Date.now() - pausedAt; pausedAt = 0; lastPoint = null; }
       pauseButton.textContent = paused ? '▶' : 'Ⅱ';
       pauseButton.setAttribute('aria-label', paused ? '继续跑步' : '暂停跑步');
+      setGps(paused ? '训练已暂停' : 'GPS已连接', paused ? '#f0b44d' : '#52dfbf'); renderRun();
     });
   }
   if (page === 'complete') {
     const run = state.run || { distance: 0, seconds: 0 };
     const vals = document.querySelectorAll('.training-summary-value');
-    const mins = Math.max(1, Math.round(run.seconds / 60));
-    if (vals[0]) vals[0].textContent = Number(run.distance).toFixed(1);
-    if (vals[1]) vals[1].textContent = String(mins);
-    if (vals[2]) vals[2].textContent = Number(run.distance) < .01 ? '—' : `${Math.floor(mins / Number(run.distance))}'00"`;
+    const mins = Number(run.seconds || 0) / 60;
+    if (vals[0]) vals[0].textContent = Number(run.distance || 0).toFixed(2);
+    if (vals[1]) vals[1].textContent = mins.toFixed(1);
+    if (vals[2]) { const paceSeconds = Number(run.distance) > 0 ? Math.round(Number(run.seconds) / Number(run.distance)) : 0; vals[2].textContent = paceSeconds ? `${Math.floor(paceSeconds / 60)}'${String(paceSeconds % 60).padStart(2, '0')}"` : '—'; }
     document.getElementById('feedback-step-btn')?.addEventListener('click', () => go(16));
     document.getElementById('return-plan-btn')?.addEventListener('click', () => go(9));
   }
 
   // Feedback controls, ratings, tags, optional note and local photo selection.
   if (page === 'feedback') {
-    const feedback = state.feedback || { scores: {}, parts: [] };
-    const workoutLabel = document.querySelector('[data-feedback-workout]');
+    const feedback = state.feedback || { scores: {} };
+      const workoutLabel = document.querySelector('[data-feedback-workout]');
     if (workoutLabel) api('/plans/active').then(({ plan }) => {
       const workout = plan?.workouts?.find((item) => item.id === state.workoutId);
       if (!workout) return;
       const amount = workout.distanceKm != null ? `${workout.distanceKm} km` : workout.durationMin != null ? `${workout.durationMin} 分钟` : '';
-      workoutLabel.textContent = `${workout.courseKey || workout.courseId || '课程'} · ${workout.courseName || workout.title}${amount ? ` · ${amount}` : ''}`;
+      workoutLabel.textContent = `${courseName(workout)}${amount ? ` · ${amount}` : ''}`;
     }).catch((error) => notify(error.message));
     ['subjective', 'physical', 'pain'].forEach((key) => {
       const container = document.getElementById(`stars-${key}`); if (!container) return;
       container.innerHTML = Array.from({ length: 5 }, (_, i) => `<button type="button" aria-label="${i + 1} 分" aria-pressed="${i < (feedback.scores[key] || 0)}" data-rating="${i + 1}" class="rating-star transition-transform active:scale-125 focus:outline-none p-0.5"><svg class="w-7 h-7 drop-shadow-sm" fill="${i < (feedback.scores[key] || 0) ? '#ff9800' : '#cbd5e1'}" viewBox="0 0 24 24"><path style="fill:${i < (feedback.scores[key] || 0) ? '#ff9800' : '#cbd5e1'} !important" d="M12 0 C12 7, 7 12, 0 12 C7 12, 12 17, 12 24 C12 17, 17 12, 24 12 C17 12, 12 7, 12 0 Z"></path><rect fill="#ffffff" height="3.2" rx="0.8" transform="rotate(45 12 12)" width="3.2" x="10.4" y="10.4"></rect></svg></button>`).join('');
       container.addEventListener('click', (event) => {
         const b = event.target.closest('[data-rating]'); if (!b) return;
-        feedback.scores[key] = Number(b.dataset.rating);
+        const rating = Number(b.dataset.rating);
+        feedback.scores[key] = Number(feedback.scores[key]) === rating ? 0 : rating;
         container.querySelectorAll('[data-rating]').forEach((star) => {
           const active = Number(star.dataset.rating) <= feedback.scores[key];
           star.setAttribute('aria-pressed', String(active));
@@ -501,84 +603,152 @@
         state.feedback = feedback; save();
       });
     });
-    const no = document.getElementById('btn-discomfort-no'), yes = document.getElementById('btn-discomfort-yes'), box = document.getElementById('discomfort-box');
-    const locationInput = box?.querySelector('input');
-    const showParts = (show) => { if (box) { box.classList.toggle('hidden', !show); box.classList.toggle('flex', show); } no?.classList.toggle('ring-2', !show); yes?.classList.toggle('ring-2', show); };
-    no?.addEventListener('click', () => { feedback.discomfort = false; feedback.parts = []; if (locationInput) locationInput.value = ''; state.feedback = feedback; save(); showParts(false); });
-    yes?.addEventListener('click', () => { feedback.discomfort = true; state.feedback = feedback; save(); showParts(true); });
-    box?.querySelectorAll('.part-chip').forEach((chip) => chip.addEventListener('click', () => { chip.classList.toggle('ring-2'); const name = chip.textContent.trim(); feedback.parts = feedback.parts.includes(name) ? feedback.parts.filter((v) => v !== name) : [...feedback.parts, name]; state.feedback = feedback; save(); }));
-    if (feedback.discomfort) showParts(true);
     const comment = document.getElementById('comment-box');
     if (comment && feedback.comment) comment.value = feedback.comment;
     if (comment && document.getElementById('char-count')) document.getElementById('char-count').textContent = `${comment.value.length} / 200`;
-    if (locationInput && feedback.location) locationInput.value = feedback.location;
-    box?.querySelectorAll('.part-chip').forEach((chip) => { if (feedback.parts.includes(chip.textContent.trim())) chip.classList.add('ring-2'); });
-    locationInput?.addEventListener('input', () => { feedback.location = locationInput.value; state.feedback = feedback; save(); });
     comment?.addEventListener('input', () => { feedback.comment = comment.value; const counter = document.getElementById('char-count'); if (counter) counter.textContent = `${comment.value.length} / 200`; state.feedback = feedback; save(); });
     const attach = [...document.querySelectorAll('button')].find((b) => b.textContent.includes('配图'));
     if (attach) { const picker = document.createElement('input'); picker.type = 'file'; picker.accept = 'image/*'; picker.hidden = true; document.body.append(picker); attach.addEventListener('click', () => picker.click()); picker.addEventListener('change', () => { if (picker.files?.[0]) attach.setAttribute('aria-label', `已选择图片：${picker.files[0].name}`); }); }
     document.getElementById('submit-btn')?.addEventListener('click', () => {
       if (!['subjective', 'physical', 'pain'].every((key) => Number(feedback.scores[key]) >= 1 && Number(feedback.scores[key]) <= 5)) { notify('请完成三项训练感受评分后提交。'); return; }
-      if (feedback.discomfort !== true && feedback.discomfort !== false) { notify('请选择是否有局部不适后提交。'); return; }
-      feedback.comment = comment?.value || ''; feedback.location = locationInput?.value || ''; state.feedback = feedback; save();
+      feedback.comment = comment?.value || ''; state.feedback = feedback; save();
       if (!state.trainingRecordId) { notify('找不到本次训练记录，请从今日训练重新开始。'); return; }
-      api(`/training-records/${state.trainingRecordId}/feedback`, { method: 'POST', body: JSON.stringify({ subjective: Number(feedback.scores.subjective), physical: Number(feedback.scores.physical), pain: Number(feedback.scores.pain), discomfort: feedback.discomfort, discomfortParts: [...feedback.parts, ...(feedback.location ? [feedback.location] : [])], note: feedback.comment, completion: state.run?.seconds ? 'completed' : 'partial' }) })
+      api(`/training-records/${state.trainingRecordId}/feedback`, { method: 'POST', body: JSON.stringify({ subjective: Number(feedback.scores.subjective), physical: Number(feedback.scores.physical), pain: Number(feedback.scores.pain), note: feedback.comment, completion: state.run?.seconds ? 'completed' : 'partial' }) })
         .then((result) => { state.feedbackId = result.feedbackId; state.feedbackAnalysis = result.analysis; save(); go(17); })
         .catch((error) => notify(error.message));
     });
   }
   if (page === 'plan-changes') {
     document.querySelectorAll('button').forEach((button) => { if (button.textContent.includes('返回计划')) button.dataset.route = '9'; });
-    const headerBack = document.querySelector('header button'); if (headerBack) headerBack.dataset.route = '9';
-    const before = state.previousPlan?.workouts || [];
-    const after = state.activePlan?.workouts || [];
-    const changed = after.filter((item) => item.status === 'scheduled').map((item) => {
-      const prior = before.find((candidate) => candidate.week === item.week && candidate.day === item.day);
-      return prior && (prior.courseKey !== item.courseKey || prior.title !== item.title || prior.type !== item.type || prior.durationMin !== item.durationMin || prior.distanceKm !== item.distanceKm || prior.intensity !== item.intensity || prior.talkTest !== item.talkTest) ? { prior, item } : null;
-    }).filter(Boolean).slice(0, 3);
+    const header = document.querySelector('[data-purpose="top-navigation"]');
+    const fromPlanPage = new URLSearchParams(location.search).get('source') === 'plan';
+    if (header?.firstElementChild) {
+      header.firstElementChild.replaceChildren();
+      if (fromPlanPage) {
+        const back = document.createElement('button'); back.type = 'button'; back.className = 'w-9 h-9 flex items-center justify-center rounded-full text-2xl text-slate-300 hover:bg-white/10';
+        back.setAttribute('aria-label', '返回计划'); back.textContent = '‹'; back.dataset.route = '9'; header.firstElementChild.append(back);
+      }
+    }
     const list = document.querySelector('[data-purpose="specific-changes-section"] .space-y-3');
-    if (list) {
+    const note = document.querySelector('[data-purpose="explanation-section"] .space-y-3');
+    const explanationSection = document.querySelector('[data-purpose="explanation-section"]');
+    const explanationCard = explanationSection?.querySelector('.bg-navy-850\\/75');
+    const explanationHeader = explanationSection?.querySelector('.flex.items-center');
+    if (explanationCard && explanationHeader) {
+      explanationCard.id = 'plan-adjustment-explanation';
+      explanationCard.hidden = true;
+      explanationCard.style.display = 'none';
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'ml-auto inline-flex h-9 w-9 items-center justify-center rounded-full border border-emerald-300/25 bg-emerald-300/[0.08] text-emerald-100 shadow-[0_4px_14px_rgba(16,185,129,0.12)] transition hover:border-emerald-200/45 hover:bg-emerald-300/[0.14] active:scale-[0.94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/50';
+      toggle.setAttribute('aria-controls', explanationCard.id);
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', '查看具体调整说明');
+      toggle.title = '查看具体调整说明';
+      const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      chevron.setAttribute('viewBox', '0 0 24 24');
+      chevron.setAttribute('width', '20');
+      chevron.setAttribute('height', '20');
+      chevron.setAttribute('fill', 'none');
+      chevron.setAttribute('stroke', 'currentColor');
+      chevron.setAttribute('stroke-width', '2.25');
+      chevron.setAttribute('stroke-linecap', 'round');
+      chevron.setAttribute('stroke-linejoin', 'round');
+      chevron.classList.add('transition-transform', 'duration-200');
+      const chevronPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      chevronPath.setAttribute('d', 'm6 9 6 6 6-6');
+      chevron.append(chevronPath);
+      toggle.append(chevron); explanationHeader.append(toggle);
+      toggle.addEventListener('click', () => {
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        explanationCard.hidden = expanded;
+        explanationCard.style.display = expanded ? 'none' : '';
+        toggle.setAttribute('aria-label', expanded ? '查看具体调整说明' : '收起调整说明');
+        toggle.title = expanded ? '查看具体调整说明' : '收起调整说明';
+        chevron.style.transform = expanded ? '' : 'rotate(180deg)';
+      });
+    }
+    const renderPlanChanges = () => {
+      const before = state.previousPlan?.workouts || [];
+      const after = state.activePlan?.workouts || [];
+      const adjustment = state.adjustment;
+      const edits = adjustment?.workouts?.length ? adjustment.workouts
+        : ['rest', 'medical_review'].includes(adjustment?.status) ? (adjustment?.planChanges || []) : [];
+      const changed = edits.map((edit) => {
+        const prior = before.find((candidate) => candidate.week === edit.week && candidate.day === edit.day);
+        const current = after.find((candidate) => candidate.week === edit.week && candidate.day === edit.day);
+        const item = { ...(current || {}), ...edit };
+        if (current?.status) item.status = current.status;
+        else if (['rest', 'medical_review'].includes(adjustment?.status) && Number(edit.durationMin) === 0) item.status = 'skipped';
+        return prior ? { prior, item } : null;
+      }).filter(Boolean).slice(0, 3);
+      if (list) {
       list.replaceChildren();
       changed.forEach(({ prior, item }, index) => {
         const card = document.createElement('article'); card.className = `bg-navy-850/75 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-3.5 animate-fade-slide stagger-${Math.min(index + 1, 3)} shadow-[0_4px_20px_rgba(0,0,0,0.3)]`; card.dataset.purpose = 'change-item';
         const top = document.createElement('div'); top.className = 'flex items-center justify-between pb-2 border-b border-white/[0.06] mb-2.5';
         const badge = document.createElement('span'); badge.className = 'text-[12px] font-semibold tracking-wide text-white bg-white/[0.06] px-2 py-0.5 rounded border border-white/10'; badge.textContent = `第 ${item.week} 周 · Day ${item.day}`; top.append(badge);
-        const comparison = document.createElement('div'); comparison.className = 'flex items-center justify-between gap-2 text-[13px]';
-        const oldBox = document.createElement('div'); oldBox.className = 'flex flex-col gap-0.5 shrink-0 w-28';
+        const comparison = document.createElement('div'); comparison.className = 'grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 text-[13px]';
+        const oldBox = document.createElement('div'); oldBox.className = 'flex min-w-0 flex-col gap-0.5 text-left';
         const oldLabel = document.createElement('span'); oldLabel.className = 'text-[11px] text-slate-400 font-medium'; oldLabel.textContent = '原计划';
-        const oldName = document.createElement('span'); oldName.className = 'text-slate-300 font-normal'; oldName.textContent = `${prior.courseKey || prior.courseId || '课程'} · ${prior.courseName || prior.title}`;
-        const workoutMeta = (workout) => [workout.distanceKm != null ? `${workout.distanceKm} km` : workout.durationMin != null ? `${workout.durationMin} 分钟` : '', workout.intensity].filter(Boolean).join(' · ');
-        const oldMeta = document.createElement('span'); oldMeta.className = 'text-[10px] text-slate-400'; oldMeta.textContent = workoutMeta(prior); oldBox.append(oldLabel, oldName, oldMeta);
-        const arrow = document.createElement('span'); arrow.className = 'text-cyan-400 shrink-0 mr-auto'; arrow.textContent = '→';
-        const newBox = document.createElement('div'); newBox.className = 'flex flex-col gap-0.5 text-right shrink-0';
-        const newLabel = document.createElement('span'); newLabel.className = 'text-[11px] text-cyan-400 font-medium'; newLabel.textContent = '调整后计划';
-        const newName = document.createElement('span'); newName.className = 'text-cyan-300 font-semibold truncate'; newName.textContent = `${item.courseKey || item.courseId || '课程'} · ${item.courseName || item.title}`;
-        const newMeta = document.createElement('span'); newMeta.className = 'text-[10px] text-cyan-200'; newMeta.textContent = workoutMeta(item); newBox.append(newLabel, newName, newMeta);
+        const oldName = document.createElement('span'); oldName.className = 'text-slate-300 font-normal'; oldName.textContent = courseName(prior);
+        const workoutMeta = (workout) => {
+          const range = Array.isArray(workout.distanceRangeKm) && workout.distanceRangeKm.length === 2
+            ? `${Number(workout.distanceRangeKm[0]).toFixed(1)}–${Number(workout.distanceRangeKm[1]).toFixed(1)} km`
+            : '';
+          const pace = paceRangeText(workout);
+          return [range, pace].filter(Boolean).join(' · ') || '距离和配速暂不可用';
+        };
+        const oldMeta = document.createElement('span'); oldMeta.className = 'text-[9px] leading-4 tracking-tight text-slate-400 whitespace-nowrap'; oldMeta.textContent = workoutMeta(prior); oldBox.append(oldLabel, oldName, oldMeta);
+        const arrow = document.createElement('span'); arrow.className = 'text-cyan-400 shrink-0'; arrow.textContent = '→';
+        const newBox = document.createElement('div'); newBox.className = 'flex min-w-0 flex-col gap-0.5 text-right';
+        const cancelled = item.status === 'skipped';
+        const newLabel = document.createElement('span'); newLabel.className = 'text-[11px] text-cyan-400 font-medium'; newLabel.textContent = cancelled ? '调整为休息' : '调整后计划';
+        const newName = document.createElement('span'); newName.className = 'text-cyan-300 font-semibold truncate'; newName.textContent = cancelled ? '本次训练已取消' : courseName(item);
+        const newMeta = document.createElement('span'); newMeta.className = 'text-[9px] leading-4 tracking-tight text-cyan-200 whitespace-nowrap'; newMeta.textContent = cancelled ? '按反馈暂停本周训练' : workoutMeta(item); newBox.append(newLabel, newName, newMeta);
         comparison.append(oldBox, arrow, newBox); card.append(top, comparison); list.append(card);
       });
-      if (!changed.length) { const card = document.createElement('div'); card.className = 'bg-navy-850/75 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 text-[13px] text-slate-300'; card.textContent = state.adjustment?.status === 'maintain' ? '本次计划保持不变。' : '本次没有需要变更的后续课程。'; list.append(card); }
-    }
-    const note = document.querySelector('[data-purpose="explanation-section"] .space-y-3');
-    if (note) {
-      note.replaceChildren();
-      const lines = String(state.feedbackAnalysis || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-      const reason = state.adjustment?.reason; if (reason) lines.push(`调整原因=${reason}`);
-      if (!lines.length) lines.push('Dify 未返回反馈分析说明。');
-      lines.forEach((line) => { const entry = document.createElement('div'); entry.className = 'flex items-start gap-2.5'; const dot = document.createElement('span'); dot.className = 'w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 shrink-0'; const text = document.createElement('p'); text.className = 'text-slate-300'; text.textContent = line; entry.append(dot, text); note.append(entry); });
-    }
+      if (!changed.length) { const card = document.createElement('div'); card.className = 'bg-navy-850/75 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 text-[13px] text-slate-300'; card.textContent = !adjustment ? '还没有训练计划调整记录。' : adjustment.status === 'maintain' ? '本次计划保持不变。' : '本次没有需要变更的后续课程。'; list.append(card); }
+      }
+      if (note) {
+        note.replaceChildren();
+        const lines = String(state.feedbackAnalysis || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+        if (!lines.length) lines.push(adjustment ? '本次暂无调整说明。' : '还没有训练计划调整说明。');
+        lines.forEach((line) => { const entry = document.createElement('div'); entry.className = 'flex items-start gap-2.5'; const dot = document.createElement('span'); dot.className = 'w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 shrink-0'; const text = document.createElement('p'); text.className = 'text-slate-300'; text.textContent = line; entry.append(dot, text); note.append(entry); });
+      }
+    };
+    if (list) { list.replaceChildren(); const loading = document.createElement('div'); loading.className = 'text-[13px] text-slate-400'; loading.textContent = '正在读取最近一次计划调整…'; list.append(loading); }
+    api('/plans/adjustments/latest').then((result) => {
+      state.previousPlan = result.previousPlan || null;
+      state.activePlan = result.plan || state.activePlan || null;
+      state.adjustment = result.adjustment || null;
+      state.feedbackAnalysis = result.feedbackAnalysis || '';
+      save(); renderPlanChanges();
+    }).catch((error) => { renderPlanChanges(); notify(error.message); });
   }
   if (page === 'mine') {
     const rows = [...document.querySelectorAll('.menu-row')];
-    if (rows[0]) { rows[0].dataset.route = '7'; rows[0].setAttribute('role', 'button'); rows[0].tabIndex = 0; }
+    if (rows[0]) { rows[0].dataset.profileReadonly = '1'; rows[0].querySelector('span:last-child')?.remove(); rows[0].setAttribute('role', 'button'); rows[0].tabIndex = 0; }
     if (rows[1]) { rows[1].dataset.action = 'logout'; rows[1].setAttribute('role', 'button'); rows[1].tabIndex = 0; }
+    if (rows[2]) { rows[2].dataset.action = 'delete-account'; rows[2].setAttribute('role', 'button'); rows[2].tabIndex = 0; }
   }
 
   // One delegated handler covers every data-driven route and back/logout action.
   document.addEventListener('click', (event) => {
     const target = event.target.closest('[data-route], [data-action]'); if (!target) return;
+    if (target.dataset.profileReadonly) { window.location.href = `${encodeURI(pageFiles[7])}?readonly=1`; return; }
     if (target.dataset.route) { const n = Number(target.dataset.route); if (n) go(n); return; }
     if (target.dataset.action === 'back') { go(backTargets[page] || 1); return; }
     if (target.dataset.action === 'logout') { sessionStorage.removeItem(stateKey); sessionStorage.removeItem(authKey); localStorage.removeItem(tokenKey); go(1); }
+    if (target.dataset.action === 'delete-account') {
+      if (!window.confirm('注销后，此账号的跑者档案、训练计划、训练记录和反馈将被永久删除，无法恢复。确定注销账户吗？')) return;
+      target.setAttribute('aria-disabled', 'true');
+      api('/me/account', { method: 'DELETE' }).then(() => {
+        sessionStorage.removeItem(stateKey); sessionStorage.removeItem(authKey); localStorage.removeItem(tokenKey);
+        window.location.href = encodeURI(pageFiles[1]);
+      }).catch((error) => { target.removeAttribute('aria-disabled'); notify(error.message); });
+    }
   });
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
