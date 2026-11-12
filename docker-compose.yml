@@ -12,7 +12,7 @@ services:
       - "${MYSQL_PORT:-13307}:3306"
     volumes:
       - zhicheng_runner_v1_mysql_data:/var/lib/mysql
-      - ./004.数据库脚本/001_init_mysql.sql:/docker-entrypoint-initdb.d/001_init_mysql.sql:ro
+      - ./database/001_init_mysql.sql:/docker-entrypoint-initdb.d/001_init_mysql.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
@@ -34,8 +34,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./003.前端代码/frontend:/app/frontend:ro
-      - ./001.产品相关文件/知识库:/app/knowledge:ro
+      - ./frontend:/app/frontend:ro
+      - ./docs/knowledge-base:/app/knowledge:ro
     depends_on:
       mysql:
         condition: service_healthy

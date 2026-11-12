@@ -34,7 +34,7 @@ DIFY_API_BASE_URL = os.environ.get("DIFY_API_BASE_URL", "http://172.22.0.1/v1").
 DIFY_PLAN_API_KEY = os.environ.get("DIFY_PLAN_API_KEY", "")
 DIFY_ADJUST_API_KEY = os.environ.get("DIFY_ADJUST_API_KEY", "")
 WORKFLOW_PROGRESS = contextvars.ContextVar("workflow_progress", default=None)
-KNOWLEDGE_BASE_DIR = Path(os.environ.get("KNOWLEDGE_BASE_DIR", "../001.产品相关文件/知识库")).resolve()
+KNOWLEDGE_BASE_DIR = Path(os.environ.get("KNOWLEDGE_BASE_DIR", "../docs/knowledge-base")).resolve()
 engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=1800)
 Session = sessionmaker(bind=engine, expire_on_commit=False)
 bearer = HTTPBearer(auto_error=False)
@@ -822,6 +822,6 @@ def delete_account(user=Depends(current_user)):
     return {"deleted": True}
 
 
-frontend_dir = Path(os.environ.get("FRONTEND_DIR", "../003.前端代码/frontend")).resolve()
+frontend_dir = Path(os.environ.get("FRONTEND_DIR", "../frontend")).resolve()
 if frontend_dir.exists():
     app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")

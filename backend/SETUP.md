@@ -1,6 +1,6 @@
 # 智程跑步教练后端
 
-后端使用 FastAPI、SQLAlchemy 和 MySQL。API 容器使用本机已有 Python API 基础镜像中的运行库，但作为独立容器运行，不读取旧项目数据库、容器卷或配置。Docker Compose 会启动本项目独立 MySQL 并执行 `004.数据库脚本/001_init_mysql.sql`。计划生成和训练反馈调整都由 Dify 工作流生成；后端只负责校验与保存工作流结果。
+后端使用 FastAPI、SQLAlchemy 和 MySQL。API 容器使用本机已有 Python API 基础镜像中的运行库，但作为独立容器运行，不读取旧项目数据库、容器卷或配置。Docker Compose 会启动本项目独立 MySQL 并执行 `database/001_init_mysql.sql`。计划生成和训练反馈调整都由 Dify 工作流生成；后端只负责校验与保存工作流结果。
 
 ## 启动
 
@@ -41,7 +41,7 @@ docker compose ps
 
 每节课的 `distanceRangeKm` 必须是两个递增的有限数字，`paceRangeMinPerKm` 必须包含具体分钟/公里区间。后端保留范围到 workout，`GET /api/plans/active` 和 `GET /api/workouts/today` 会返回这两个字段；`distanceKm` 仍为兼容用的可选单值。旧 workout 缺少新值时，会从关联课程目录中的首次计划知识库课程块读取通用距离和配速范围。
 
-已有数据库升级时，使用项目 MySQL 数据库执行 `004.数据库脚本/003_workout_distance_pace.sql`；该脚本不会清空用户数据，可重复执行。新建数据库则由 `001_init_mysql.sql` 建立包含新字段的完整结构。升级后需重启/重建 API 容器以加载后端代码。
+已有数据库升级时，使用项目 MySQL 数据库执行 `database/003_workout_distance_pace.sql`；该脚本不会清空用户数据，可重复执行。新建数据库则由 `database/001_init_mysql.sql` 建立包含新字段的完整结构。升级后需重启/重建 API 容器以加载后端代码。
 
 反馈调整流程的起始变量为 `current_plan`、`training_feedback`，最终输出变量为 `adjusted_plan`、`warmup_stretch_sources`。`adjusted_plan` 对象包含 `status`、`ruleId`、`adjustmentScope`、`workouts`、`planChanges` 和 `feedback_analysis`；不包含 `reason`。后端从该对象读取说明并返回给前端，不配置独立的顶层 `feedback_analysis` 输出。`current_plan.recentWorkouts`提供截至本次反馈课在内最近最多三节训练作为上下文，包含已完成训练但只读；`current_plan.adjustmentTargets`按 `next_1`、`next_2`、`next_3` 和 `current_week`给出可以修改的未来课程。后端校验 Dify 返回的课程身份和调整日期，越界结果不会入库。
 
