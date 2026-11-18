@@ -389,7 +389,7 @@
           const title = document.querySelector('.today-card h2'); if (title) title.textContent = courseName(workout);
           const metrics = document.querySelectorAll('.today-metrics .metric strong');
           if (metrics[0]) metrics[0].textContent = selectedDistanceText(workout) || '按课程安排';
-          if (metrics[1]) metrics[1].textContent = paceRangeText(workout) || '按 RPE';
+          if (metrics[1]) metrics[1].textContent = (paceRangeText(workout).replace(/\s*min\/km/gi, '') || '按 RPE');
           if (metrics[2]) metrics[2].textContent = workout.durationMin != null ? `${workout.durationMin} 分钟` : '—';
         }).catch((error) => notify(error.message));
       }

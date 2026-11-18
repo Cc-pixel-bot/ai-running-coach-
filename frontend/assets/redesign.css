@@ -426,11 +426,10 @@ body[data-page="plan-overview"] main { padding-top: 1.5rem !important; }
 .screen-plan-home .today-card h2 { font-size: 22px; }
 .screen-plan-home .today-card .eyebrow { color: #aebdce; }
 .screen-plan-home .today-metrics { border-color: rgb(255 255 255 / .16); }
-.screen-plan-home .today-metrics { grid-template-columns: minmax(0, .65fr) minmax(0, 2fr) minmax(0, .7fr); column-gap: 10px; }
-.screen-plan-home .today-metrics .metric { min-width: 0; overflow: hidden; }
+.screen-plan-home .today-metrics { grid-template-columns: minmax(0, .7fr) minmax(0, 1.5fr) minmax(0, .7fr); column-gap: clamp(8px, 2vw, 12px); }
+.screen-plan-home .today-metrics .metric { min-width: 0; overflow: hidden; text-align: center; }
 .screen-plan-home .metric small { color: #c0cad4; }
-.screen-plan-home .metric strong { overflow: hidden; font-size: 18px; text-overflow: clip; white-space: nowrap; }
-.screen-plan-home .today-metrics .metric:nth-child(2) strong { white-space: nowrap; font-size: clamp(14px, 4.1vw, 17px); letter-spacing: -0.035em; }
+.screen-plan-home .metric strong { overflow: hidden; font-size: clamp(15px, 4.2vw, 18px); text-overflow: clip; white-space: nowrap; }
 .screen-plan-home .today-card .pill { color: #fff; background: rgb(255 255 255 / .1); }
 .screen-plan-home .primary-button { min-height: 54px; border-radius: 999px; background: #087df5; box-shadow: 0 8px 18px rgb(8 125 245 / .22); }
 .screen-plan-home .bottom-nav { background: #061521; border-color: #173140; }
