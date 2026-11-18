@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS runner_profile (
     weight_kg           DECIMAL(5,2) NOT NULL,
     goal                VARCHAR(32) NOT NULL DEFAULT 'complete_10k',
     longest_run_km      DECIMAL(6,2) NOT NULL,
+    average_daily_km    TINYINT UNSIGNED NULL,
     latest_10k_minutes  DECIMAL(6,2) NULL,
     train_days          TINYINT UNSIGNED NOT NULL,
     target_minutes      DECIMAL(6,2) NULL,
@@ -38,6 +39,7 @@ CREATE TABLE IF NOT EXISTS runner_profile (
     CONSTRAINT ck_profile_weight CHECK (weight_kg BETWEEN 25 AND 300),
     CONSTRAINT ck_profile_goal CHECK (goal = 'complete_10k'),
     CONSTRAINT ck_profile_longest_run CHECK (longest_run_km >= 0),
+    CONSTRAINT ck_profile_average_daily_km CHECK (average_daily_km IS NULL OR average_daily_km BETWEEN 2 AND 10),
     CONSTRAINT ck_profile_latest_10k CHECK (latest_10k_minutes IS NULL OR latest_10k_minutes > 0),
     CONSTRAINT ck_profile_train_days CHECK (train_days BETWEEN 1 AND 7),
     CONSTRAINT ck_profile_target CHECK (target_minutes IS NULL OR target_minutes > 0)
@@ -83,7 +85,7 @@ CREATE TABLE IF NOT EXISTS course_catalog (
     is_active       BOOLEAN NOT NULL DEFAULT TRUE,
     synced_at       DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     UNIQUE KEY uq_course_source_key (source_key),
-    CONSTRAINT ck_course_type CHECK (type IN ('easy','recovery','long','quality','tempo','interval','other'))
+    CONSTRAINT ck_course_type CHECK (type IN ('easy','aerobic_base','easy,aerobic_base','run_walk','recovery','long','long_run','quality','strides','tempo','interval','other'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='训练课程目录，包含课程编号、名称和知识库内容';
 
 CREATE TABLE IF NOT EXISTS workout (
@@ -165,7 +167,7 @@ CREATE TABLE IF NOT EXISTS training_feedback (
     CONSTRAINT ck_feedback_completion CHECK (completion IN ('completed','partial','missed','unknown')),
     CONSTRAINT ck_feedback_subjective CHECK (subjective BETWEEN 1 AND 5),
     CONSTRAINT ck_feedback_physical CHECK (physical BETWEEN 1 AND 5),
-    CONSTRAINT ck_feedback_pain CHECK (pain BETWEEN 1 AND 5)
+    CONSTRAINT ck_feedback_pain CHECK (pain BETWEEN 0 AND 5)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='训练反馈、身体状态、疼痛信息与分析结果';
 
 -- AI 调用审计摘要与幂等键；不要在摘要中存储密码或密钥。

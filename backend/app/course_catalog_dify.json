@@ -1,0 +1,431 @@
+[
+  {
+    "courseKey": "I-1",
+    "title": "跑走交替 I",
+    "type": "run_walk",
+    "level": "L0",
+    "distanceRangeKm": [
+      1.4,
+      2.7
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "I-2",
+    "title": "跑走交替 II",
+    "type": "run_walk",
+    "level": "L0-L1",
+    "distanceRangeKm": [
+      2.1,
+      3.3
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "I-3",
+    "title": "跑走交替 III",
+    "type": "run_walk",
+    "level": "L1",
+    "distanceRangeKm": [
+      2.6,
+      4.2
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "E-20",
+    "title": "连续轻松跑 I",
+    "type": "easy",
+    "level": "L1",
+    "distanceRangeKm": [
+      2.4,
+      4.6
+    ],
+    "paceRangeMinPerKm": "6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "E-40",
+    "title": "连续轻松跑 II",
+    "type": "easy,aerobic_base",
+    "level": "L1-L2",
+    "distanceRangeKm": [
+      3.5,
+      6.2
+    ],
+    "paceRangeMinPerKm": "6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "E-50",
+    "title": "连续轻松跑 III",
+    "type": "easy,aerobic_base",
+    "level": "L2-L3",
+    "distanceRangeKm": [
+      4.7,
+      7.7
+    ],
+    "paceRangeMinPerKm": "6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "ER-20",
+    "title": "恢复跑",
+    "type": "recovery",
+    "level": "L0、L1、L2、L3",
+    "distanceRangeKm": [
+      1.8,
+      3.1
+    ],
+    "paceRangeMinPerKm": "7:00–9:30 min/km"
+  },
+  {
+    "courseKey": "LR-60",
+    "title": "长距离轻松跑（基础）",
+    "type": "long_run",
+    "level": "L1-L2",
+    "distanceRangeKm": [
+      6.5,
+      9.2
+    ],
+    "paceRangeMinPerKm": "6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "IR-75",
+    "title": "长距离轻松跑（进阶）",
+    "type": "long_run",
+    "level": "L2-L3",
+    "distanceRangeKm": [
+      8.0,
+      13.8
+    ],
+    "paceRangeMinPerKm": "6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "T-15",
+    "title": "持续节奏跑",
+    "type": "tempo",
+    "level": "L2",
+    "distanceRangeKm": [
+      4.0,
+      6.5
+    ],
+    "paceRangeMinPerKm": "主训练 5:15–6:30 min/km；热身、放松 6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "T-2x8",
+    "title": "巡航间歇 I",
+    "type": "tempo",
+    "level": "L2",
+    "distanceRangeKm": [
+      4.5,
+      7.0
+    ],
+    "paceRangeMinPerKm": "主训练 5:15–6:30 min/km；热身、放松和慢跑恢复 6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "T-3x10",
+    "title": "巡航间歇 II",
+    "type": "tempo",
+    "level": "L3",
+    "distanceRangeKm": [
+      6.0,
+      9.0
+    ],
+    "paceRangeMinPerKm": "主训练 5:15–6:30 min/km；热身、放松和慢跑恢复 6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "I-3x3",
+    "title": "间歇跑 I",
+    "type": "interval",
+    "level": "L2",
+    "distanceRangeKm": [
+      4.0,
+      6.5
+    ],
+    "paceRangeMinPerKm": "主训练 4:40–5:45 min/km；热身、放松及恢复 6:30–9:30 min/km"
+  },
+  {
+    "courseKey": "I-5x3",
+    "title": "间歇跑 II",
+    "type": "interval",
+    "level": "L3",
+    "distanceRangeKm": [
+      5.0,
+      7.5
+    ],
+    "paceRangeMinPerKm": "主训练 4:40–5:45 min/km；热身、放松及恢复 6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "I-400",
+    "title": "400 米间歇",
+    "type": "interval",
+    "level": "L2-L3",
+    "distanceRangeKm": [
+      5.0,
+      7.5
+    ],
+    "paceRangeMinPerKm": "快跑段 4:10–5:15 min/km；热身、放松及恢复 6:30–9:30 min/km"
+  },
+  {
+    "courseKey": "ST-4",
+    "title": "渐进加速",
+    "type": "strides",
+    "level": "L1、L2、L3",
+    "distanceRangeKm": [
+      2.5,
+      5.0
+    ],
+    "paceRangeMinPerKm": "基础跑 6:30–8:30 min/km；20 秒加速段 3:50–5:00 min/km"
+  },
+  {
+    "courseKey": "L-1A",
+    "title": "跑走交替（入门）",
+    "type": "run_walk",
+    "level": "L0",
+    "distanceRangeKm": [
+      2.1,
+      3.0
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "L-1B",
+    "title": "跑走交替（过渡）",
+    "type": "run_walk",
+    "level": "L0",
+    "distanceRangeKm": [
+      2.5,
+      3.5
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "L-2B",
+    "title": "跑走交替（进阶）",
+    "type": "run_walk",
+    "level": "L0-L1",
+    "distanceRangeKm": [
+      2.8,
+      4.0
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "RW-REC",
+    "title": "低负荷跑走恢复",
+    "type": "recovery",
+    "level": "L0-L1",
+    "distanceRangeKm": [
+      1.7,
+      2.8
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "E-30",
+    "title": "连续轻松跑（基础）",
+    "type": "easy",
+    "level": "L1",
+    "distanceRangeKm": [
+      3.0,
+      5.4
+    ],
+    "paceRangeMinPerKm": "6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "LR-45",
+    "title": "长距离轻松跑 I",
+    "type": "long_run",
+    "level": "L1",
+    "distanceRangeKm": [
+      4.1,
+      6.9
+    ],
+    "paceRangeMinPerKm": "6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "E-60",
+    "title": "连续轻松跑（进阶）",
+    "type": "easy,aerobic_base",
+    "level": "L2-L3",
+    "distanceRangeKm": [
+      5.9,
+      9.2
+    ],
+    "paceRangeMinPerKm": "6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "LR-70",
+    "title": "长距离轻松跑 II",
+    "type": "long_run",
+    "level": "L2-L3",
+    "distanceRangeKm": [
+      7.6,
+      11.5
+    ],
+    "paceRangeMinPerKm": "6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "T-4x5",
+    "title": "巡航间歇 III",
+    "type": "tempo",
+    "level": "L2",
+    "distanceRangeKm": [
+      5.5,
+      7.5
+    ],
+    "paceRangeMinPerKm": "主训练 5:15–6:30 min/km；热身、组间恢复和放松 6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "I-4x3",
+    "title": "间歇跑（基础）",
+    "type": "interval",
+    "level": "L2-L3",
+    "distanceRangeKm": [
+      5.0,
+      7.0
+    ],
+    "paceRangeMinPerKm": "主训练 4:40–5:45 min/km；热身、恢复和放松 6:30–9:30 min/km"
+  },
+  {
+    "courseKey": "I-5x4",
+    "title": "间歇跑（进阶）",
+    "type": "interval",
+    "level": "L3",
+    "distanceRangeKm": [
+      6.5,
+      9.0
+    ],
+    "paceRangeMinPerKm": "主训练 4:40–5:45 min/km；热身、恢复和放松 6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "E-70",
+    "title": "连续轻松跑（高阶）",
+    "type": "easy,aerobic_base",
+    "level": "L3",
+    "distanceRangeKm": [
+      7.0,
+      10.8
+    ],
+    "paceRangeMinPerKm": "6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "LR-60-L3",
+    "title": "长距离轻松跑（高阶）",
+    "type": "long_run",
+    "level": "L3",
+    "distanceRangeKm": [
+      6.5,
+      10.0
+    ],
+    "paceRangeMinPerKm": "6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "T-2x10-L3",
+    "title": "巡航间歇（高阶I）",
+    "type": "tempo",
+    "level": "L3",
+    "distanceRangeKm": [
+      5.5,
+      8.0
+    ],
+    "paceRangeMinPerKm": "主训练 5:15–6:30 min/km；热身、组间恢复和放松 6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "T-3x6-L3",
+    "title": "巡航间歇（高阶II）",
+    "type": "tempo",
+    "level": "L3",
+    "distanceRangeKm": [
+      5.0,
+      7.5
+    ],
+    "paceRangeMinPerKm": "主训练 5:15–6:30 min/km；热身、组间恢复和放松 6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "E-TAPER-20",
+    "title": "减量期轻松跑",
+    "type": "easy",
+    "level": "L0、L1、L2、L3",
+    "distanceRangeKm": [
+      1.5,
+      3.5
+    ],
+    "paceRangeMinPerKm": "L0–L1 7:00–9:30 min/km；L2–L3 6:30–8:30 min/km"
+  },
+  {
+    "courseKey": "LR-30",
+    "title": "长距离跑走（基础）",
+    "type": "long_run",
+    "level": "L0",
+    "distanceRangeKm": [
+      1.8,
+      3.2
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "LR-35",
+    "title": "长距离跑走（递进）",
+    "type": "long_run",
+    "level": "L0-L1",
+    "distanceRangeKm": [
+      2.4,
+      3.8
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "LR-40",
+    "title": "长距离跑走（巩固）",
+    "type": "long_run",
+    "level": "L1",
+    "distanceRangeKm": [
+      2.8,
+      4.5
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "LR-50-L1",
+    "title": "长距离跑走（进阶 I）",
+    "type": "long_run",
+    "level": "L1-L2",
+    "distanceRangeKm": [
+      4.0,
+      5.0
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "LR-60-L2",
+    "title": "长距离跑走（进阶 II）",
+    "type": "long_run",
+    "level": "L2",
+    "distanceRangeKm": [
+      5.0,
+      6.2
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "LR-75-L2",
+    "title": "长距离跑走（进阶 III）",
+    "type": "long_run",
+    "level": "L2-L3",
+    "distanceRangeKm": [
+      6.2,
+      8.0
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  },
+  {
+    "courseKey": "LR-90-L3",
+    "title": "长距离跑走（进阶 IV）",
+    "type": "long_run",
+    "level": "L3",
+    "distanceRangeKm": [
+      8.0,
+      9.0
+    ],
+    "paceRangeMinPerKm": "跑段 7:30–9:30 min/km；步行段 10:00–15:00 min/km"
+  }
+]

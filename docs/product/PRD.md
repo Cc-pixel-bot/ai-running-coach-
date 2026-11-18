@@ -77,6 +77,7 @@
 | weight | number | 是 | 体重，kg |
 | goal | string | 是 | V1 固定为完成 10km |
 | longest_run_km | number | 是 | 最近最长一次连续跑距离 |
+| average_daily_km | integer | 是 | 平均日跑量，按最近实际跑步日计算的单次平均距离，2–10 km |
 | latest_10k_minutes | number | 否 | 最近一次 10km 成绩 |
 | train_days | integer | 是 | 每周可训练天数 |
 | target_minutes | number | 否 | 10km 目标完成时间 |
@@ -112,20 +113,17 @@
 
 ### 6.2 检索与生成职责
 
-后端根据结构化用户输入生成 retrieval_query，用于知识库检索。
+首次计划工作流中的“生成 retrieval_query”代码节点根据跑者档案标签生成 retrieval_query，并将其传给课程检索节点。查询只表达课程库可匹配的标签条件，不预先列出或优先指定候选 courseKey。
 
 retrieval_query 至少包含：
 
 - goal
 - level
 - phase
-- train_days
 - type
 - quality
-- health_status
-- 完整课程片段要求
 
-大模型接收用户档案和知识库结果，只负责组合计划，不负责自由生成检索条件，不得绕过知识库创造课程。
+代码节点另行输出档案估算的每周跑步次数和每周跑量：每周跑步次数按档案中的每周训练次数估算，每周跑量按平均日跑量乘以每周训练次数估算。该估算不代表设备实测或历史训练记录，目前暂未接入模型提示词。大模型接收用户档案和知识库结果，只负责组合计划，不负责自由生成检索条件，不得绕过知识库创造课程。
 
 ### 6.3 计划 JSON
 
@@ -239,7 +237,7 @@ V1 默认只调整下一次训练。原因是最近一次反馈只能直接证�
 
 - 登录、注册和身份校验。
 - 保存用户、档案、计划、训练记录和反馈。
-- 生成 retrieval_query。
+- 将跑者档案传入 Dify 工作流。
 - 调用 Dify 工作流。
 - 校验模型 JSON 和计划约束。
 - 处理超时、空结果、非法格式和重复提交。
@@ -247,7 +245,8 @@ V1 默认只调整下一次训练。原因是最近一次反馈只能直接证�
 
 ### Dify
 
-- 根据 retrieval_query 检索知识库课程。
+- 根据档案标签生成 retrieval_query，并检索知识库课程。
+- 输出估算的每周跑步次数和跑量，供后续计划编排接入。
 - 使用用户档案和检索结果生成初始计划。
 - 输出固定格式的训练反馈标签。
 - 根据反馈标签和调整规则生成下一次训练调整结果。
@@ -263,7 +262,7 @@ V1 默认只调整下一次训练。原因是最近一次反馈只能直接证�
 
 ### RunnerProfile
 
-account、height、weight、goal、longestRunKm、latest10kMinutes、trainDays、targetMinutes、healthStatus、bodyData、updatedAt。
+account、height、weight、goal、longestRunKm、averageDailyKm、latest10kMinutes、trainDays、targetMinutes、healthStatus、bodyData、updatedAt。
 
 ### TrainingPlan
 
@@ -373,7 +372,7 @@ id、trainingRecordId、userId、completion、subjective、physical、pain、dis
 ## 16. 当前决策记录
 
 1. 用户档案和身体数据提供给大模型，但只有结构化 retrieval_query 用于知识库检索。
-2. 后端负责生成检索标签，大模型不自由推导检索条件。
+2. Dify 代码节点负责生成检索标签，大模型不自由推导检索条件。
 3. 知识库提供完整课程，大模型负责组合，不得编造。
 4. 反馈分析先输出固定标签，再进入调整流程。
 5. 调整默认只作用于下一次训练。

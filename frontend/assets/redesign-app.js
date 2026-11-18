@@ -13,6 +13,8 @@
   const stateKey = 'zc-redesign-state-v1';
   const authKey = 'zc-redesign-auth-v1';
   const tokenKey = 'zc-access-token-v1';
+  const goalDisplayLabel = '提升 10 公里';
+  const goalApiLabel = '完成 10 公里';
   const page = document.body.dataset.page || '';
   document.documentElement.dataset.page = decodeURIComponent(location.pathname.split('/').pop() || '');
   document.documentElement.classList.add('zc-ready');
@@ -67,9 +69,45 @@
     if (Array.isArray(range) && range.length === 2 && range.every((value) => Number.isFinite(Number(value)))) return `${Number(range[0]).toFixed(1)}–${Number(range[1]).toFixed(1)} km`;
     return workout?.distanceKm != null ? `${workout.distanceKm} km` : '';
   }
+  function selectedDistanceText(workout) {
+    const target = workout?.distanceKm;
+    const range = workout?.distanceRangeKm;
+    if (typeof target === 'number' && Number.isFinite(target) && Array.isArray(range) && range.length === 2
+      && range.every((value) => Number.isFinite(Number(value))) && target >= Number(range[0]) && target <= Number(range[1])) {
+      return `${target.toFixed(1)} km`;
+    }
+    return distanceRangeText(workout);
+  }
   function paceRangeText(workout) { return typeof workout?.paceRangeMinPerKm === 'string' ? workout.paceRangeMinPerKm.trim() : ''; }
-  function workoutTargetText(workout) {
-    return [distanceRangeText(workout) ? `距离 ${distanceRangeText(workout)}` : '', paceRangeText(workout) ? `配速 ${paceRangeText(workout)}` : '', workout?.durationMin != null ? `${workout.durationMin} 分钟` : ''].filter(Boolean).join(' · ');
+  function concisePaceRange(workout, reference = workout) {
+    const pace = paceRangeText(workout);
+    if (!/主训练/.test(paceRangeText(reference))) return pace;
+    if (/主训练/.test(pace)) {
+      const main = pace.match(/主训练\s*(\d{1,2}:\d{2}\s*[–—-]\s*\d{1,2}:\d{2})/);
+      if (main) return `主训练配速 ${main[1].replace(/[–—-]/g, '–')} min/km`;
+    }
+    const range = pace.match(/\d{1,2}:\d{2}\s*[–—-]\s*\d{1,2}:\d{2}/);
+    return range ? `${range[0].replace(/[–—-]/g, '–')} min/km` : pace;
+  }
+  function localizeAdjustmentExplanation(line) {
+    const translations = {
+      medical_review: '就医评估', very_low: '很低', very_high: '很高', completed: '已完成',
+      partial: '部分完成', missed: '未完成', unknown: '未知', moderate: '中等', normal: '正常',
+      progress: '进阶', reduce: '减量', recovery: '恢复', maintain: '保持', rest: '休息',
+      severe: '严重', mild: '轻微', poor: '较差', good: '良好', high: '高', low: '低', none: '无', rpe: '主观强度'
+    };
+    return String(line)
+      .replace(/\bmin\/km\b/gi, '分钟/公里')
+      .replace(/(\d+(?:\.\d+)?)km\b/gi, '$1公里')
+      .replace(/(\d+(?:\.\d+)?)min\b/gi, '$1分钟')
+      .replace(/\bkm\b/gi, '公里')
+      .replace(/\bmin\b/gi, '分钟')
+      .replace(/\bmedical_review\b|\bvery_low\b|\bvery_high\b|\bcompleted\b|\bpartial\b|\bmissed\b|\bunknown\b|\bmoderate\b|\bnormal\b|\bprogress\b|\breduce\b|\brecovery\b|\bmaintain\b|\brest\b|\bsevere\b|\bmild\b|\bpoor\b|\bgood\b|\bhigh\b|\blow\b|\bnone\b|\brpe\b/gi,
+        (value) => translations[value.toLowerCase()] || value);
+  }
+  function workoutTargetText(workout, useSelectedDistance = false) {
+    const distance = useSelectedDistance ? selectedDistanceText(workout) : distanceRangeText(workout);
+    return [distance ? `距离 ${distance}` : '', paceRangeText(workout) ? `配速 ${paceRangeText(workout)}` : '', workout?.durationMin != null ? `${workout.durationMin} 分钟` : ''].filter(Boolean).join(' · ');
   }
   if (page !== 'login' && !token()) { window.location.replace(encodeURI(pageFiles[1])); return; }
   function go(number) {
@@ -85,12 +123,12 @@
     input.classList.toggle('has-value', input.value.trim() !== '');
     input.addEventListener('input', () => input.classList.toggle('has-value', input.value.trim() !== ''));
   });
-  function profile() { state.profile ||= {}; return state.profile; }
+  function profile() { state.profile ||= {}; if (state.profile.goal === goalApiLabel) state.profile.goal = goalDisplayLabel; return state.profile; }
   function notify(message) { window.alert(message); }
   if (page !== 'login' && token() && !state.profile?.height) {
     api('/profile').then(({ profile: saved }) => {
       if (!saved) return;
-      Object.assign(profile(), { height: saved.height, weight: saved.weight, goal: '完成 10 公里', 'longest-run': saved.longestRunKm, 'latest-10k': saved.latest10kMinutes, 'train-days': saved.trainDays, targetMinutes: saved.targetMinutes, health: saved.health || [] });
+      Object.assign(profile(), { height: saved.height, weight: saved.weight, goal: goalDisplayLabel, 'longest-run': saved.longestRunKm, 'average-daily-km': saved.averageDailyKm, 'latest-10k': saved.latest10kMinutes, 'train-days': saved.trainDays, targetMinutes: saved.targetMinutes, health: saved.health || [] });
       save(); window.location.reload();
     }).catch(() => {});
   }
@@ -148,7 +186,7 @@
         const saved = await api('/profile');
         if (saved.profile) {
           const p = saved.profile;
-          Object.assign(profile(), { height: p.height, weight: p.weight, goal: '完成 10 公里', 'longest-run': p.longestRunKm, 'latest-10k': p.latest10kMinutes, 'train-days': p.trainDays, targetMinutes: p.targetMinutes, health: p.health || [] });
+          Object.assign(profile(), { height: p.height, weight: p.weight, goal: goalDisplayLabel, 'longest-run': p.longestRunKm, 'average-daily-km': p.averageDailyKm, 'latest-10k': p.latest10kMinutes, 'train-days': p.trainDays, targetMinutes: p.targetMinutes, health: p.health || [] });
           save(); go(9);
         } else go(2);
       } catch (error) { notify(error.message); }
@@ -195,34 +233,37 @@
   }
   if (page === 'profile-goal') {
     const cards = [...document.querySelectorAll('#optionsContainer [role="radio"]')];
-    const selectedGoal = profile().goal === '完成 10 公里' ? profile().goal : '';
-    const continueButton = document.querySelector('[data-purpose="bottom-bar"] button');
+    const selectedGoal = profile().goal === goalDisplayLabel ? profile().goal : '';
+    const continueButton = document.querySelector('[data-purpose="bottom-bar"] button, .action button');
     function paintGoal(goal) {
       cards.forEach((card) => {
-        const selected = goal && card.querySelector('h3')?.textContent.trim() === goal;
+        const selected = goal && (card.dataset.goal || card.querySelector('h3, strong')?.textContent.trim()) === goal;
         card.setAttribute('aria-checked', String(!!selected));
+        card.classList.toggle('selected', !!selected);
         card.classList.toggle('border-2', !!selected); card.classList.toggle('border-[#087df5]', !!selected);
         card.classList.toggle('border', !selected); card.classList.toggle('border-zinc-200', !selected);
-        const circle = card.querySelector('.check-circle');
+        const circle = card.querySelector('.check-circle, .radio');
         circle?.classList.toggle('bg-[#087df5]', !!selected); circle?.classList.toggle('border-[#087df5]', !!selected);
         circle?.classList.toggle('border-zinc-200', !selected);
+        if (circle?.classList.contains('radio')) circle.textContent = selected ? '✓' : '';
       });
       if (continueButton) continueButton.disabled = !goal;
     }
     paintGoal(selectedGoal);
     cards.forEach((card) => {
-      const choose = () => { const goal = card.querySelector('h3')?.textContent.trim() || ''; if (goal !== '完成 10 公里') return; profile().goal = goal; save(); paintGoal(goal); };
+      const choose = () => { const goal = card.dataset.goal || card.querySelector('h3, strong')?.textContent.trim() || ''; if (goal !== goalDisplayLabel) return; profile().goal = goal; save(); paintGoal(goal); };
       card.addEventListener('click', choose); card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(); } });
     });
-    document.querySelector('[data-purpose="bottom-bar"] button')?.addEventListener('click', () => {
-      if (!profile().goal) { notify('请选择“完成 10 公里”后继续。'); return; } go(4);
+    document.querySelector('[data-purpose="bottom-bar"] button, .action button')?.addEventListener('click', () => {
+      if (!profile().goal) { notify('请选择“提升 10 公里”后继续。'); return; } go(4);
     });
   }
   if (page === 'profile-running') {
-    ['longest-run', 'latest-10k', 'train-days'].forEach((id) => setValue(id, profile()[id]));
+    ['longest-run', 'average-daily-km', 'latest-10k', 'train-days'].forEach((id) => setValue(id, profile()[id]));
     document.querySelector('.action button')?.addEventListener('click', () => {
       const fields = [
         ['longest-run', (v) => Number.isFinite(Number(v)) && Number(v) >= 5 && Number(v) <= 20, '最长连续跑距离需为 5–20 公里'],
+        ['average-daily-km', (v) => Number.isInteger(Number(v)) && Number(v) >= 2 && Number(v) <= 10, '平均日跑量需为 2–10 公里的整数'],
         ['latest-10k', (v) => !v || (Number.isInteger(Number(v)) && Number(v) >= 40 && Number(v) <= 80), '10km 成绩需为 40–80 分钟的整数'],
         ['train-days', (v) => Number.isInteger(Number(v)) && Number(v) >= 3 && Number(v) <= 7, '每周训练天数需为 3–7 天的整数']
       ];
@@ -265,7 +306,7 @@
     const summaries = [
       p.height && p.weight ? `${p.height} cm · ${p.weight} kg` : '',
       p.goal || '',
-      p['longest-run'] ? `最长连续跑 ${p['longest-run']} km<br>最近一次10km ${p['latest-10k'] ? `${p['latest-10k']} 分钟` : '未填写'}<br>每周可训练 ${p['train-days'] || ''} 天` : '',
+      p['longest-run'] ? `最长连续跑 ${p['longest-run']} km<br>平均日跑量 ${p['average-daily-km'] || '未填写'} km<br>最近一次10km ${p['latest-10k'] ? `${p['latest-10k']} 分钟` : '未填写'}<br>每周可训练 ${p['train-days'] || ''} 天` : '',
       p.targetMinutes ? `${p.targetMinutes} 分钟` : '',
       Array.isArray(p.health) && p.health.length ? p.health.join('、') : ''
     ];
@@ -280,8 +321,8 @@
       else if (edit) { edit.setAttribute('role', 'button'); edit.tabIndex = 0; edit.dataset.route = String(editPages[index]); }
     });
     document.querySelector('.action button')?.addEventListener('click', () => {
-      if (!p.goal || !p.height || !p.weight || !p['longest-run'] || !p['train-days'] || !p.targetMinutes || !p.health?.length) { notify('请先完成所有建档信息。'); return; }
-      api('/profile', { method: 'PUT', body: JSON.stringify({ height: Number(p.height), weight: Number(p.weight), goal: p.goal, longestRunKm: Number(p['longest-run']), latest10kMinutes: p['latest-10k'] ? Number(p['latest-10k']) : null, trainDays: Number(p['train-days']), targetMinutes: Number(p.targetMinutes), health: p.health, healthStatus: p.health.join('、') }) })
+      if (!p.goal || !p.height || !p.weight || !p['longest-run'] || !p['average-daily-km'] || !p['train-days'] || !p.targetMinutes || !p.health?.length) { notify('请先完成所有建档信息。'); return; }
+      api('/profile', { method: 'PUT', body: JSON.stringify({ height: Number(p.height), weight: Number(p.weight), goal: p.goal === goalDisplayLabel ? goalApiLabel : p.goal, longestRunKm: Number(p['longest-run']), averageDailyKm: Number(p['average-daily-km']), latest10kMinutes: p['latest-10k'] ? Number(p['latest-10k']) : null, trainDays: Number(p['train-days']), targetMinutes: Number(p.targetMinutes), health: p.health, healthStatus: p.health.join('、') }) })
         .then(() => go(8)).catch((error) => notify(error.message));
     });
   }
@@ -347,14 +388,15 @@
           state.workoutId = workout.id; save();
           const title = document.querySelector('.today-card h2'); if (title) title.textContent = courseName(workout);
           const metrics = document.querySelectorAll('.today-metrics .metric strong');
-          if (metrics[0]) metrics[0].textContent = distanceRangeText(workout) || '按课程安排';
-          if (metrics[1]) metrics[1].textContent = (paceRangeText(workout).replace(/\s*min\s*\/\s*km\s*$/i, ' /km')) || '按 RPE';
+          if (metrics[0]) metrics[0].textContent = selectedDistanceText(workout) || '按课程安排';
+          if (metrics[1]) metrics[1].textContent = paceRangeText(workout) || '按 RPE';
           if (metrics[2]) metrics[2].textContent = workout.durationMin != null ? `${workout.durationMin} 分钟` : '—';
         }).catch((error) => notify(error.message));
       }
       if (page === 'plan-overview') {
         const heading = document.querySelector('main h1'); if (heading) heading.textContent = plan.title;
         const total = plan.workouts.length;
+        const currentWorkout = plan.workouts.find((w) => ['scheduled', 'in_progress'].includes(w.status));
         const completed = plan.workouts.filter((item) => item.status === 'completed').length;
         const percent = total ? Math.round(completed * 100 / total) : 0;
         const progress = document.querySelector('main svg circle[stroke-dasharray] + circle');
@@ -368,7 +410,7 @@
         const frequency = [...document.querySelectorAll('main span')].find((el) => el.textContent.trim() === '频次 & 总量');
         if (frequency?.parentElement?.lastElementChild) {
           const value = frequency.parentElement.lastElementChild;
-          value.textContent = `每周 ${plan.trainDays} 次 · 共 ${total} 节`;
+          value.textContent = `每周约 ${plan.trainDays} 次 · 共 ${total} 节`;
         }
         const timeline = document.querySelector('main .relative.flex.flex-col.pl-2');
         if (timeline) {
@@ -385,17 +427,22 @@
             summaryInner.append(weekName, count); summary.append(badge, summaryInner);
             const body = document.createElement('div'); body.className = 'ml-[18px] pl-6 pt-1.5 flex flex-col';
             rows.forEach((w) => {
-              const row = document.createElement('div'); row.className = `relative ${w.status === 'in_progress' ? 'py-3' : 'py-2.5'} flex items-center justify-between gap-3`;
-              const dotColor = w.status === 'completed' ? 'bg-[#34C759]' : w.status === 'in_progress' ? 'bg-[#007AFF]' : 'bg-[#C1C6D7]';
-              const dot = document.createElement('div'); dot.className = `absolute -left-[28px] top-1/2 -translate-y-1/2 ${w.status === 'in_progress' ? 'w-2.5 h-2.5' : 'w-2 h-2'} rounded-full ${dotColor} ring-2 ring-[#F8F9FA]`;
+              const isCompleted = w.status === 'completed';
+              const isCurrent = w.id === currentWorkout?.id || w.status === 'in_progress';
+              const isPartial = w.status === 'partial';
+              const row = document.createElement('div'); row.className = `relative ${isCurrent ? 'py-3' : 'py-2.5'} flex items-center justify-between gap-3`;
+              const dotColor = isCompleted ? 'bg-[#34C759]' : isCurrent ? 'bg-[#007AFF]' : isPartial ? 'bg-[#FF9F0A]' : 'bg-[#C1C6D7]';
+              const dot = document.createElement('div'); dot.className = `absolute -left-[28px] top-1/2 -translate-y-1/2 ${isCurrent ? 'w-2.5 h-2.5' : 'w-2 h-2'} rounded-full ${dotColor} ring-2 ring-[#F8F9FA]`;
               const labelWrap = document.createElement('div'); labelWrap.className = 'flex flex-col items-start gap-1 min-w-0 flex-1';
               const identity = document.createElement('div'); identity.className = 'flex items-center gap-2.5 min-w-0';
-              const dayLabel = document.createElement('span'); dayLabel.className = `text-[12px] ${w.status === 'in_progress' ? 'font-bold text-[#007AFF]' : 'font-semibold text-[#86868B]'} shrink-0`; dayLabel.textContent = `Day ${w.day}`;
-              const name = document.createElement('span'); name.className = `text-[13px] ${w.status === 'in_progress' ? 'font-bold' : 'font-medium'} text-[#1D1D1F] truncate`; name.textContent = courseName(w);
+              const dayLabel = document.createElement('span'); dayLabel.className = `text-[12px] ${isCurrent ? 'font-bold text-[#007AFF]' : 'font-semibold text-[#86868B]'} shrink-0`; dayLabel.textContent = `Day ${w.day}`;
+              const name = document.createElement('span'); name.className = `text-[13px] ${isCurrent ? 'font-bold' : 'font-medium'} text-[#1D1D1F] truncate`; name.textContent = courseName(w);
               identity.append(dayLabel, name); labelWrap.append(identity);
-              const meta = document.createElement('span'); meta.className = 'text-[10px] text-[#86868B] whitespace-normal'; meta.textContent = workoutTargetText(w); labelWrap.append(meta);
+              const meta = document.createElement('span'); meta.className = 'text-[10px] text-[#86868B] whitespace-normal'; meta.textContent = workoutTargetText(w, w.id === currentWorkout?.id); labelWrap.append(meta);
               const right = document.createElement('div'); right.className = 'flex items-center gap-2 shrink-0';
-              const stateLabel = document.createElement('span'); stateLabel.className = 'text-[11px] text-[#86868B]'; stateLabel.textContent = w.status === 'completed' ? '已完成' : w.status === 'in_progress' ? '进行中' : w.status === 'skipped' ? '已取消 · 休息' : '待开始';
+              const stateLabel = document.createElement('span');
+              stateLabel.className = `text-[11px] font-semibold ${isCompleted ? 'text-[#34C759]' : isCurrent ? 'text-[#007AFF]' : isPartial ? 'text-[#D97706]' : 'text-[#86868B]'}`;
+              stateLabel.textContent = isCompleted ? '已完成' : isCurrent ? '进行中' : isPartial ? '未完成' : w.status === 'skipped' ? '已取消 · 休息' : '待开始';
               right.append(stateLabel); row.append(dot, labelWrap, right);
               if (w.status === 'scheduled' && !timeline.querySelector('[data-first-workout]')) { row.dataset.firstWorkout = 'true'; row.tabIndex = 0; row.setAttribute('role', 'button'); row.dataset.route = '11'; row.addEventListener('click', () => { state.workoutId = w.id; save(); }); }
               body.append(row);
@@ -430,7 +477,7 @@
       const title = document.querySelector('.workout-title');
        if (title) title.textContent = courseName(workout);
       const value = document.querySelector('[data-workout-value]');
-      if (value) value.textContent = distanceRangeText(workout) || `${workout.durationMin ?? '—'} 分钟`;
+      if (value) value.textContent = selectedDistanceText(workout) || `${workout.durationMin ?? '—'} 分钟`;
     }).catch((error) => notify(error.message));
     document.querySelector('.primary-button')?.addEventListener('click', async (event) => {
     event.currentTarget.disabled = true;
@@ -524,7 +571,6 @@
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
       renderRun();
       state.run = { seconds, distance: Number((distanceMeters / 1000).toFixed(3)), completedAt: Date.now() };
-      save();
       const saveRun = state.trainingRecordId ? api(`/training-records/${state.trainingRecordId}/finish`, { method: 'POST', body: JSON.stringify({ distanceKm: state.run.distance, durationMin: Number((seconds / 60).toFixed(2)), completed: seconds > 0 && state.run.distance > 0 }) }) : Promise.resolve();
       saveRun.then(() => go(14)).catch((error) => { notify(error.message); go(14); });
     };
@@ -583,7 +629,7 @@
     if (workoutLabel) api('/plans/active').then(({ plan }) => {
       const workout = plan?.workouts?.find((item) => item.id === state.workoutId);
       if (!workout) return;
-      const amount = workout.distanceKm != null ? `${workout.distanceKm} km` : workout.durationMin != null ? `${workout.durationMin} 分钟` : '';
+      const amount = distanceRangeText(workout) || (workout.durationMin != null ? `${workout.durationMin} 分钟` : '');
       workoutLabel.textContent = `${courseName(workout)}${amount ? ` · ${amount}` : ''}`;
     }).catch((error) => notify(error.message));
     ['subjective', 'physical', 'pain'].forEach((key) => {
@@ -610,10 +656,12 @@
     const attach = [...document.querySelectorAll('button')].find((b) => b.textContent.includes('配图'));
     if (attach) { const picker = document.createElement('input'); picker.type = 'file'; picker.accept = 'image/*'; picker.hidden = true; document.body.append(picker); attach.addEventListener('click', () => picker.click()); picker.addEventListener('change', () => { if (picker.files?.[0]) attach.setAttribute('aria-label', `已选择图片：${picker.files[0].name}`); }); }
     document.getElementById('submit-btn')?.addEventListener('click', () => {
-      if (!['subjective', 'physical', 'pain'].every((key) => Number(feedback.scores[key]) >= 1 && Number(feedback.scores[key]) <= 5)) { notify('请完成三项训练感受评分后提交。'); return; }
+      if (!['subjective', 'physical'].every((key) => Number(feedback.scores[key]) >= 1 && Number(feedback.scores[key]) <= 5)) { notify('请完成训练感受和身体状态评分后提交。'); return; }
+      const painScore = Number(feedback.scores.pain ?? 0);
+      if (!Number.isInteger(painScore) || painScore < 0 || painScore > 5) { notify('疼痛评分不合法，请重新选择。'); return; }
       feedback.comment = comment?.value || ''; state.feedback = feedback; save();
       if (!state.trainingRecordId) { notify('找不到本次训练记录，请从今日训练重新开始。'); return; }
-      api(`/training-records/${state.trainingRecordId}/feedback`, { method: 'POST', body: JSON.stringify({ subjective: Number(feedback.scores.subjective), physical: Number(feedback.scores.physical), pain: Number(feedback.scores.pain), note: feedback.comment, completion: state.run?.seconds ? 'completed' : 'partial' }) })
+      api(`/training-records/${state.trainingRecordId}/feedback`, { method: 'POST', body: JSON.stringify({ subjective: Number(feedback.scores.subjective), physical: Number(feedback.scores.physical), pain: painScore, note: feedback.comment, completion: state.run?.seconds ? 'completed' : 'partial' }) })
         .then((result) => { state.feedbackId = result.feedbackId; state.feedbackAnalysis = result.analysis; save(); go(17); })
         .catch((error) => notify(error.message));
     });
@@ -673,14 +721,15 @@
       const before = state.previousPlan?.workouts || [];
       const after = state.activePlan?.workouts || [];
       const adjustment = state.adjustment;
-      const edits = adjustment?.workouts?.length ? adjustment.workouts
-        : ['rest', 'medical_review'].includes(adjustment?.status) ? (adjustment?.planChanges || []) : [];
+      const edits = adjustment?.planChanges || [];
       const changed = edits.map((edit) => {
         const prior = before.find((candidate) => candidate.week === edit.week && candidate.day === edit.day);
         const current = after.find((candidate) => candidate.week === edit.week && candidate.day === edit.day);
         const item = { ...(current || {}), ...edit };
         if (current?.status) item.status = current.status;
-        else if (['rest', 'medical_review'].includes(adjustment?.status) && Number(edit.durationMin) === 0) item.status = 'skipped';
+        else if (String(edit.type || '').toLowerCase() === 'rest'
+          && Number(edit.durationMin) === 0
+          && (edit.distanceKm == null || Number(edit.distanceKm) === 0)) item.status = 'skipped';
         return prior ? { prior, item } : null;
       }).filter(Boolean).slice(0, 3);
       if (list) {
@@ -693,12 +742,10 @@
         const oldBox = document.createElement('div'); oldBox.className = 'flex min-w-0 flex-col gap-0.5 text-left';
         const oldLabel = document.createElement('span'); oldLabel.className = 'text-[11px] text-slate-400 font-medium'; oldLabel.textContent = '原计划';
         const oldName = document.createElement('span'); oldName.className = 'text-slate-300 font-normal'; oldName.textContent = courseName(prior);
-        const workoutMeta = (workout) => {
-          const range = Array.isArray(workout.distanceRangeKm) && workout.distanceRangeKm.length === 2
-            ? `${Number(workout.distanceRangeKm[0]).toFixed(1)}–${Number(workout.distanceRangeKm[1]).toFixed(1)} km`
-            : '';
-          const pace = paceRangeText(workout);
-          return [range, pace].filter(Boolean).join(' · ') || '距离和配速暂不可用';
+        const workoutMeta = (workout, reference = workout) => {
+          const distance = selectedDistanceText(workout);
+          const pace = concisePaceRange(workout, reference);
+          return [distance, pace].filter(Boolean).join(' · ') || '距离和配速暂不可用';
         };
         const oldMeta = document.createElement('span'); oldMeta.className = 'text-[9px] leading-4 tracking-tight text-slate-400 whitespace-nowrap'; oldMeta.textContent = workoutMeta(prior); oldBox.append(oldLabel, oldName, oldMeta);
         const arrow = document.createElement('span'); arrow.className = 'text-cyan-400 shrink-0'; arrow.textContent = '→';
@@ -706,7 +753,7 @@
         const cancelled = item.status === 'skipped';
         const newLabel = document.createElement('span'); newLabel.className = 'text-[11px] text-cyan-400 font-medium'; newLabel.textContent = cancelled ? '调整为休息' : '调整后计划';
         const newName = document.createElement('span'); newName.className = 'text-cyan-300 font-semibold truncate'; newName.textContent = cancelled ? '本次训练已取消' : courseName(item);
-        const newMeta = document.createElement('span'); newMeta.className = 'text-[9px] leading-4 tracking-tight text-cyan-200 whitespace-nowrap'; newMeta.textContent = cancelled ? '按反馈暂停本周训练' : workoutMeta(item); newBox.append(newLabel, newName, newMeta);
+        const newMeta = document.createElement('span'); newMeta.className = 'text-[9px] leading-4 tracking-tight text-cyan-200 whitespace-nowrap'; newMeta.textContent = cancelled ? '按反馈暂停本周训练' : workoutMeta(item, prior); newBox.append(newLabel, newName, newMeta);
         comparison.append(oldBox, arrow, newBox); card.append(top, comparison); list.append(card);
       });
       if (!changed.length) { const card = document.createElement('div'); card.className = 'bg-navy-850/75 backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 text-[13px] text-slate-300'; card.textContent = !adjustment ? '还没有训练计划调整记录。' : adjustment.status === 'maintain' ? '本次计划保持不变。' : '本次没有需要变更的后续课程。'; list.append(card); }
@@ -715,7 +762,35 @@
         note.replaceChildren();
         const lines = String(state.feedbackAnalysis || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
         if (!lines.length) lines.push(adjustment ? '本次暂无调整说明。' : '还没有训练计划调整说明。');
-        lines.forEach((line) => { const entry = document.createElement('div'); entry.className = 'flex items-start gap-2.5'; const dot = document.createElement('span'); dot.className = 'w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 shrink-0'; const text = document.createElement('p'); text.className = 'text-slate-300'; text.textContent = line; entry.append(dot, text); note.append(entry); });
+        const runChanges = changed.filter(({ item }) => String(item.type || '').toLowerCase() !== 'rest');
+        const cancelledCount = changed.length - runChanges.length;
+        if (runChanges.length || cancelledCount) {
+          const qualityDowngraded = runChanges.some(({ prior, item }) =>
+            ['tempo', 'interval', 'quality', 'long'].includes(String(prior.type || '').toLowerCase())
+            && ['easy', 'recovery'].includes(String(item.type || '').toLowerCase()));
+          const summaryParts = [];
+          if (runChanges.length) {
+            if (['reduce', 'recovery'].includes(String(adjustment?.status || '').toLowerCase())) {
+              summaryParts.push(`我把后续${runChanges.length}次跑步安排整体放轻，缩短跑量并放慢节奏`);
+              if (qualityDowngraded) summaryParts.push('同时把质量课改为轻松跑');
+            } else if (String(adjustment?.status || '').toLowerCase() === 'progress') {
+              summaryParts.push(`我结合你的状态，为后续${runChanges.length}次训练安排了循序渐进的提升`);
+            } else {
+              summaryParts.push(`我根据你的状态调整了后续${runChanges.length}次训练的内容和强度`);
+            }
+          }
+          if (cancelledCount) summaryParts.push(`暂停${cancelledCount}次训练`);
+          const summaryLine = `结合这次反馈，${summaryParts.join('，')}，先给身体留出恢复空间。`;
+          if (lines.length > 1) lines[1] = summaryLine;
+          else lines.splice(1, 0, summaryLine);
+        }
+        lines.slice(0, 3).forEach((line, index) => {
+          const text = document.createElement('p'); text.className = 'text-slate-300';
+          let displayLine = line;
+          if (index === 2 && /疼痛加重|影响跑姿/.test(line)) displayLine = '先好好恢复，疼痛加重或影响跑姿就暂停训练并求助。';
+          else if (index === 2 && /不用急着补课/.test(line)) displayLine = '先好好休息，不用急着补课，按状态慢慢恢复。';
+          text.textContent = localizeAdjustmentExplanation(displayLine); note.append(text);
+        });
       }
     };
     if (list) { list.replaceChildren(); const loading = document.createElement('div'); loading.className = 'text-[13px] text-slate-400'; loading.textContent = '正在读取最近一次计划调整…'; list.append(loading); }

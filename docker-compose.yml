@@ -30,12 +30,10 @@ services:
       DIFY_PLAN_API_KEY: ${DIFY_PLAN_API_KEY:-}
       DIFY_ADJUST_API_KEY: ${DIFY_ADJUST_API_KEY:-}
       FRONTEND_DIR: /app/frontend
-      KNOWLEDGE_BASE_DIR: /app/knowledge
     ports:
       - "8000:8000"
     volumes:
       - ./frontend:/app/frontend:ro
-      - ./docs/knowledge-base:/app/knowledge:ro
     depends_on:
       mysql:
         condition: service_healthy
