@@ -1,0 +1,50 @@
+name: zhicheng-runner-cloud
+
+services:
+  mysql:
+    image: mysql:9.7.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: zhicheng_runner_v1
+      MYSQL_USER: zhicheng
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+    volumes:
+      - zhicheng_cloud_mysql_data:/var/lib/mysql
+      - ./database/001_init_mysql.sql:/docker-entrypoint-initdb.d/001_init_mysql.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql+pymysql://zhicheng:${MYSQL_PASSWORD}@mysql:3306/zhicheng_runner_v1?charset=utf8mb4
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      DIFY_API_BASE_URL: ${DIFY_API_BASE_URL:?Set DIFY_API_BASE_URL in .env}
+      DIFY_PLAN_API_KEY: ${DIFY_PLAN_API_KEY:?Set DIFY_PLAN_API_KEY in .env}
+      DIFY_ADJUST_API_KEY: ${DIFY_ADJUST_API_KEY:?Set DIFY_ADJUST_API_KEY in .env}
+      FRONTEND_DIR: /app/frontend
+    expose:
+      - "8000"
+    volumes:
+      - ./frontend:/app/frontend:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2.11-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80/tcp"
+    volumes:
+      - ./deploy/Caddyfile.http:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - api
+
+volumes:
+  zhicheng_cloud_mysql_data:

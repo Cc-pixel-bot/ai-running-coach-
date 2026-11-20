@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS runner_profile (
     CONSTRAINT ck_profile_weight CHECK (weight_kg BETWEEN 25 AND 300),
     CONSTRAINT ck_profile_goal CHECK (goal = 'complete_10k'),
     CONSTRAINT ck_profile_longest_run CHECK (longest_run_km >= 0),
-    CONSTRAINT ck_profile_average_daily_km CHECK (average_daily_km IS NULL OR average_daily_km BETWEEN 2 AND 10),
+    CONSTRAINT ck_profile_average_daily_km CHECK (average_daily_km IS NULL OR average_daily_km BETWEEN 1 AND 10),
     CONSTRAINT ck_profile_latest_10k CHECK (latest_10k_minutes IS NULL OR latest_10k_minutes > 0),
     CONSTRAINT ck_profile_train_days CHECK (train_days BETWEEN 1 AND 7),
     CONSTRAINT ck_profile_target CHECK (target_minutes IS NULL OR target_minutes > 0)

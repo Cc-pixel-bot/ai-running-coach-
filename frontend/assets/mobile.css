@@ -64,7 +64,7 @@ html[data-page^="16 "] #stars-physical,
 html[data-page^="16 "] #stars-pain {
   display: flex !important;
   width: 100% !important;
-  justify-content: center !important;
+  justify-content: flex-start !important;
   gap: 8px !important;
 }
 html[data-page^="16 "] #stars-subjective button,
@@ -133,7 +133,7 @@ html[data-page^="16 "] main > section:nth-of-type(3) .mt-5 {
   justify-content: center !important;
 }
 html[data-page^="16 "] main {
-  padding-top: 84px !important;
+  padding-top: 60px !important;
 }
 html[data-page^="16 "] main > section:first-of-type {
   width: calc(100% - 32px) !important;
@@ -200,6 +200,13 @@ html[data-page^="16 "] main > section:nth-of-type(3) > div.flex.items-center.jus
 html[data-page^="16 "] main > section:nth-of-type(3) > div.flex.items-center.justify-between.mb-2 > span::after {
   content: "训练感受";
   font-size: 13px;
+}
+html[data-page^="16 "] main > section:nth-of-type(2) > div.flex.items-center.justify-between.mb-2 {
+  position: relative !important;
+  top: -8px !important;
+}
+html[data-page^="16 "] main > section:nth-of-type(2) > div.flex.items-center.justify-between.mb-2 > span {
+  font-size: 14px !important;
 }
 /* 完成训练页重新设计：白底、居中运动图标和单屏双按钮。 */
 html[data-page^="15 "] { background:#faf8fe !important; overflow:hidden !important; }
@@ -296,6 +303,17 @@ html[data-page^="18 "] main [class*="text-slate-300"] {
 
 html[data-page^="18 "] main [class*="text-slate-400"] {
   color: #64748b !important;
+}
+html[data-page^="18 "] #plan-adjustment-explanation p {
+  font-size: 13px !important;
+  line-height: 1.75 !important;
+  white-space: pre-line !important;
+  line-break: strict !important;
+  text-wrap: pretty !important;
+  text-wrap: balance !important;
+  text-align: justify !important;
+  text-justify: inter-character !important;
+  text-align-last: start !important;
 }
 
 html[data-page^="18 "] header[data-purpose="top-navigation"] h1 {
@@ -1676,7 +1694,7 @@ html[data-page^="16 "] #stars-subjective,
 html[data-page^="16 "] #stars-physical,
 html[data-page^="16 "] #stars-pain {
   width: 100% !important;
-  justify-content: center !important;
+  justify-content: flex-start !important;
 }
 html[data-page^="16 "] main > section:nth-of-type(3) > .relative {
   border-color: rgb(100 116 139 / 0.65) !important;
@@ -2150,27 +2168,29 @@ html[data-page^="02 "] main > div > section {
   padding-top: 36px !important;
 }
 
-/* 首次计划生成流程：图标始终保留步骤语义，完成状态用绿色标签呈现。 */
-html[data-page^="08 "] .flow-icon,
-html[data-page^="17 "] .flow-icon { display: flex; width: 2rem; height: 2rem; flex: 0 0 auto; align-items: center; justify-content: center; margin-top: .125rem; border-radius: .75rem; font-size: 1.1rem; transition: color .2s, background .2s, box-shadow .2s, transform .2s; }
-html[data-page^="08 "] .flow-icon [data-glyph],
-html[data-page^="17 "] .flow-icon [data-glyph] { font-size: 19px; line-height: 1; }
-html[data-page^="08 "] .flow-icon.is-done,
-html[data-page^="17 "] .flow-icon.is-done { color: #15803d; background: linear-gradient(145deg,#dcfce7,#bbf7d0); border: 1px solid #86efac; box-shadow: 0 3px 10px rgb(34 197 94 / .12); }
-html[data-page^="08 "] .flow-icon.is-active,
-html[data-page^="17 "] .flow-icon.is-active { color: #087f5b; background: linear-gradient(145deg,#d1fae5,#a7f3d0); border: 1px solid #6ee7b7; box-shadow: 0 0 0 4px rgb(16 185 129 / .10), 0 4px 12px rgb(16 185 129 / .16); animation: flow-breathe 1.8s ease-in-out infinite; }
-html[data-page^="08 "] .flow-icon.is-pending,
-html[data-page^="17 "] .flow-icon.is-pending { color: #567083; background: linear-gradient(145deg,#eff7fb,#e3edf2); border: 1px solid #c9dce5; }
+/* 工作流页面按页面 data-page 显示节点进度颜色。 */
+body[data-page="plan-generation"] .flow-icon,
+body[data-page="plan-adjust"] .flow-icon { display: flex; width: 2rem; height: 2rem; flex: 0 0 auto; align-items: center; justify-content: center; margin-top: .125rem; border-radius: .75rem; font-size: 1.1rem; transition: color .2s, background .2s, box-shadow .2s, transform .2s; }
+body[data-page="plan-generation"] .flow-icon [data-glyph],
+body[data-page="plan-adjust"] .flow-icon [data-glyph] { font-size: 19px; line-height: 1; }
+body[data-page="plan-generation"] .flow-icon.is-done,
+body[data-page="plan-adjust"] .flow-icon.is-done { color: #15803d; background: linear-gradient(145deg,#dcfce7,#bbf7d0); border: 1px solid #86efac; box-shadow: 0 3px 10px rgb(34 197 94 / .12); }
+body[data-page="plan-generation"] .flow-icon.is-active { color: #087df5; background: linear-gradient(145deg,#dbeafe,#bfdbfe); border: 1px solid #93c5fd; box-shadow: 0 0 0 4px rgb(59 130 246 / .10), 0 4px 12px rgb(59 130 246 / .16); animation: flow-breathe-blue 1.8s ease-in-out infinite; }
+body[data-page="plan-adjust"] .flow-icon.is-active { color: #087f5b; background: linear-gradient(145deg,#d1fae5,#a7f3d0); border: 1px solid #6ee7b7; box-shadow: 0 0 0 4px rgb(16 185 129 / .10), 0 4px 12px rgb(16 185 129 / .16); animation: flow-breathe 1.8s ease-in-out infinite; }
+body[data-page="plan-generation"] .flow-icon.is-pending,
+body[data-page="plan-adjust"] .flow-icon.is-pending { color: #567083; background: linear-gradient(145deg,#eff7fb,#e3edf2); border: 1px solid #c9dce5; }
 /* 调整流程左侧是步骤语义图标，统一使用生成页的绿色图标视觉；状态文字仍独立表示完成/进行中/等待中。 */
-html[data-page^="17 "] .flow-icon.is-done,
-html[data-page^="17 "] .flow-icon.is-active,
-html[data-page^="17 "] .flow-icon.is-pending { color: #15803d; background: linear-gradient(145deg,#dcfce7,#bbf7d0); border: 1px solid #86efac; box-shadow: 0 3px 10px rgb(34 197 94 / .12); animation: none; }
-html[data-page^="08 "] .flow-status.is-done,
-html[data-page^="08 "] .flow-status.is-active { color: #15803d !important; background: #dcfce7 !important; border-color: #86efac !important; }
-html[data-page^="17 "] .flow-status.is-done { color: #15803d !important; background: #dcfce7 !important; border-color: #86efac !important; }
-html[data-page^="17 "] .flow-status.is-active { color: #0e7490 !important; background: #cffafe !important; border-color: #67e8f9 !important; }
-html[data-page^="17 "] .flow-status.is-pending { color: #475569 !important; background: #e2e8f0 !important; border-color: #cbd5e1 !important; }
+body[data-page="plan-adjust"] .flow-icon.is-done,
+body[data-page="plan-adjust"] .flow-icon.is-active,
+body[data-page="plan-adjust"] .flow-icon.is-pending { color: #15803d; background: linear-gradient(145deg,#dcfce7,#bbf7d0); border: 1px solid #86efac; box-shadow: 0 3px 10px rgb(34 197 94 / .12); animation: none; }
+body[data-page="plan-generation"] .flow-status.is-done { color: #15803d !important; background: #dcfce7 !important; border-color: #86efac !important; }
+body[data-page="plan-generation"] .flow-status.is-active { color: #1d4ed8 !important; background: #dbeafe !important; border-color: #93c5fd !important; }
+body[data-page="plan-generation"] .flow-status.is-pending { color: #6b7280 !important; background: #f3f4f6 !important; border-color: #e5e7eb !important; }
+body[data-page="plan-adjust"] .flow-status.is-done { color: #15803d !important; background: #dcfce7 !important; border-color: #86efac !important; }
+body[data-page="plan-adjust"] .flow-status.is-active { color: #0e7490 !important; background: #cffafe !important; border-color: #67e8f9 !important; }
+body[data-page="plan-adjust"] .flow-status.is-pending { color: #475569 !important; background: #e2e8f0 !important; border-color: #cbd5e1 !important; }
 @keyframes flow-breathe { 50% { transform: translateY(-1px) scale(1.04); box-shadow: 0 0 0 6px rgb(16 185 129 / .08), 0 6px 16px rgb(16 185 129 / .18); } }
+@keyframes flow-breathe-blue { 50% { transform: translateY(-1px) scale(1.04); box-shadow: 0 0 0 6px rgb(59 130 246 / .08), 0 6px 16px rgb(59 130 246 / .18); } }
 
 /* “10 计划总览.html”此前未命中旧文件名规则，恢复整页纵向滚动。 */
 html[data-page]:not([data-page="10 计划总览页.html"])[data-page^="10 "] { height: auto !important; min-height: 100dvh !important; overflow-x: hidden !important; overflow-y: auto !important; }
@@ -2178,6 +2198,22 @@ html[data-page]:not([data-page="10 计划总览页.html"])[data-page^="10 "] bod
 html[data-page^="10 "] header > div { position: relative; display: grid !important; grid-template-columns: 1fr auto 1fr; align-items: center !important; }
 html[data-page^="10 "] header > div > button { position: absolute !important; left: 0 !important; top: 50% !important; transform: translateY(-50%) !important; margin: 0 !important; display: grid !important; place-items: center !important; }
 html[data-page^="10 "] header > div > button[aria-label="返回"] { left: 0 !important; top: 50% !important; transform: translateY(-50%) !important; }
+/* 计划总览与计划调整结果页使用相同的返回按钮点击区域、图标尺寸和左上角锚点。 */
+html[data-page^="10 "] header > div > button[aria-label="返回"] {
+  position: absolute !important;
+  left: 4px !important;
+  top: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 !important;
+  transform: translateY(-50%) !important;
+  zoom: 1 !important;
+}
+html[data-page^="10 "] header > div > button[aria-label="返回"] svg {
+  display: block !important;
+  width: 24px !important;
+  height: 24px !important;
+}
 html[data-page^="10 "] header > div > span { position: static !important; grid-column: 2; transform: none !important; line-height: 1 !important; }
 html[data-page^="10 "] main { padding-top: 24px !important; }
 
@@ -2198,3 +2234,51 @@ html[data-page^="10 "] body[data-page="plan-overview"] main {
   -webkit-overflow-scrolling: touch !important;
   touch-action: pan-y !important;
 }
+
+/* 计划总览：采用已确认的自然蓝绿渐变方案，保留原有文字与信息布局。 */
+html[data-page^="10 "] body[data-page="plan-overview"] {
+  background: linear-gradient(138deg, #e5f4ff 0%, #e1f5f3 48%, #e9f8ed 100%) !important;
+  color: #15354a !important;
+}
+html[data-page^="10 "] body[data-page="plan-overview"] header {
+  background: rgba(227, 246, 249, .86) !important;
+  border-color: rgba(255,255,255,.65) !important;
+  box-shadow: 0 6px 18px rgba(35, 112, 132, .06);
+}
+html[data-page^="10 "] body[data-page="plan-overview"] header span { color: #173b4e !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] header a[aria-label="计划调整"] { color: #173b4e !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main { color: #15354a !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main h1,
+html[data-page^="10 "] body[data-page="plan-overview"] main span[class*="text-[#1D1D1F]"] { color: #15354a !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main span[class*="text-[#86868B]"] { color: #668392 !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main .border-l { border-color: rgba(94, 177, 179, .45) !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main circle:first-of-type { stroke: #cce9e0 !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main circle:last-of-type { stroke: url(#overview-progress-gradient) !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main circle:last-of-type { filter: drop-shadow(0 1px 2px rgba(58,166,150,.2)); transition: stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1); }
+html[data-page^="10 "] body[data-page="plan-overview"] main .absolute.inset-0 span:first-child span { color: #286c6a !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main summary { color: #15354a !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main summary > div:first-child { box-shadow: 0 2px 10px rgba(38,130,148,.12); }
+html[data-page^="10 "] body[data-page="plan-overview"] main .bg-\[\#007AFF\] { background: linear-gradient(135deg,#1685f8,#20c997) !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main .text-\[\#007AFF\] { color: #087eb5 !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main .week-badge-current {
+  border: 1px solid rgba(255,255,255,.88) !important;
+  background: linear-gradient(145deg,#91dfd0,#8ed5da) !important;
+  box-shadow: 0 2px 5px rgba(55,150,145,.12) !important;
+  color: #286c6a !important;
+}
+html[data-page^="10 "] body[data-page="plan-overview"] main .current-workout-accent { color: #205f5b !important; }
+html[data-page^="10 "] body[data-page="plan-overview"] main .current-workout-dot { background: #58b9a5 !important; }
+
+/* 计划主页移除底部导航后，恢复完整内容的底部空间。 */
+.screen-plan-home .page-content { padding-bottom: 18px; }
+.screen-plan-home .today-card { margin-bottom: 14px; }
+.coach-head-crop { position: relative; display: block; width: 40px; height: 40px; flex: 0 0 40px; overflow: hidden; border: 1.5px solid rgba(91, 223, 213, .72); border-radius: 50%; background: linear-gradient(145deg,#b9edff,#e5fff3); box-shadow: 0 4px 12px rgba(0, 185, 173, .2); }
+.coach-head-crop img { display: block; width: 100%; height: 100%; max-width: none; border-radius: 50%; object-fit: cover; transform: scale(2) translateY(15%); }
+.coach-change-heading > span:last-child { color: #27a879; font-size: 14px; font-weight: 700; }
+.plan-explanation-card { width: 100%; margin-top: -18px; margin-bottom: 16px; }
+.plan-explanation-surface { position: relative; overflow: hidden; padding: 14px 15px; border: 1px solid rgba(255,255,255,.52); border-radius: 20px; background: linear-gradient(135deg,rgba(218,242,249,.84),rgba(220,245,234,.84)); box-shadow: 0 6px 18px rgba(35,112,132,.07); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+.plan-explanation-accent { position: absolute; inset: 0 auto 0 0; width: 4px; background: linear-gradient(180deg,#27c9d1,#3fc99b); }
+.plan-explanation-heading { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.plan-explanation-heading > span:last-child { color: #27a879; font-size: 14px; font-weight: 700; }
+.plan-explanation-text { position: relative; z-index: 1; margin: 0; padding-left: 1px; color: #243d4a; font-size: 13px; line-height: 1.75; letter-spacing: normal; word-spacing: normal; white-space: pre-line; line-break: strict; text-wrap: pretty; text-align: justify; text-justify: inter-character; text-align-last: left; }
+.change-results-back svg { width: 20px; height: 20px; }

@@ -9,6 +9,7 @@ import queue
 import threading
 import contextvars
 import math
+from itertools import combinations
 import http.client
 import urllib.error
 import urllib.request
@@ -57,6 +58,87 @@ def parse_workout_day(value: Any) -> int:
         if match:
             return int(match.group(1))
     raise ValueError("invalid workout day")
+
+
+def schedule_with_long_quality_spacing(normalized: list[tuple[int, int, str]], raw_types_by_position: dict[tuple[int, int], str], course_keys_by_position: dict[tuple[int, int], str], weeks: int) -> dict[tuple[int, int], int] | None:
+    """Move sessions to nearby calendar days when needed to separate long and quality runs.
+
+    Session order within each week is preserved. Of valid 1–7 day assignments, choose
+    the one with the smallest total day shift; return None only when no safe schedule exists.
+    """
+    primary_quality = {"quality", "tempo", "interval"}
+    sessions_by_week: dict[int, list[tuple[int, str, str]]] = {week: [] for week in range(1, weeks + 1)}
+    for week, day, kind in normalized:
+        raw_type = raw_types_by_position[(week, day)].lower()
+        course_key = course_keys_by_position[(week, day)]
+        if course_key == "ST-4":
+            raw_type = "strides"
+        sessions_by_week[week].append((day, kind, raw_type))
+
+    candidates_by_week: dict[int, list[dict[str, Any]]] = {}
+    for week, sessions in sessions_by_week.items():
+        sessions.sort(key=lambda session: session[0])
+        candidates: list[dict[str, Any]] = []
+        for new_days in combinations(range(1, 8), len(sessions)):
+            assignments = [(old_day, new_day, kind, raw_type)
+                           for (old_day, kind, raw_type), new_day in zip(sessions, new_days)]
+            long_days = [new_day for _, new_day, kind, _ in assignments if kind == "long"]
+            quality_days = [new_day for _, new_day, _, raw_type in assignments if raw_type in primary_quality]
+            if any(abs(long_day - quality_day) == 1 for long_day in long_days for quality_day in quality_days):
+                continue
+            day_types = {new_day: ("long" if kind == "long" else "quality" if raw_type in primary_quality else "other")
+                         for _, new_day, kind, raw_type in assignments}
+            candidates.append({
+                "assignments": assignments,
+                "cost": sum(abs(old_day - new_day) for old_day, new_day, _, _ in assignments),
+                "day1": day_types.get(1),
+                "day7": day_types.get(7),
+            })
+        if not candidates:
+            return None
+        candidates_by_week[week] = candidates
+
+    # Dynamic programming carries only the previous week's boundary workout state,
+    # so a Day 7 long run cannot touch a Day 1 quality session (or vice versa).
+    parents: dict[int, dict[int, int | None]] = {}
+    costs: dict[int, dict[int, int]] = {}
+    for week in range(1, weeks + 1):
+        week_costs: dict[int, int] = {}
+        week_parents: dict[int, int | None] = {}
+        for candidate_index, candidate in enumerate(candidates_by_week[week]):
+            if week == 1:
+                week_costs[candidate_index] = candidate["cost"]
+                week_parents[candidate_index] = None
+                continue
+            best: tuple[int, int] | None = None
+            for previous_index, previous_cost in costs[week - 1].items():
+                previous = candidates_by_week[week - 1][previous_index]
+                boundary_conflict = (previous["day7"] == "long" and candidate["day1"] == "quality") or (
+                    previous["day7"] == "quality" and candidate["day1"] == "long")
+                if boundary_conflict:
+                    continue
+                total_cost = previous_cost + candidate["cost"]
+                if best is None or total_cost < best[0]:
+                    best = (total_cost, previous_index)
+            if best is not None:
+                week_costs[candidate_index], week_parents[candidate_index] = best
+        if not week_costs:
+            return None
+        costs[week], parents[week] = week_costs, week_parents
+
+    final_index = min(costs[weeks], key=costs[weeks].get)
+    selected_by_week: dict[int, int] = {}
+    for week in range(weeks, 0, -1):
+        selected_by_week[week] = final_index
+        parent_index = parents[week][final_index]
+        if parent_index is not None:
+            final_index = parent_index
+
+    day_moves: dict[tuple[int, int], int] = {}
+    for week, candidate_index in selected_by_week.items():
+        for old_day, new_day, _, _ in candidates_by_week[week][candidate_index]["assignments"]:
+            day_moves[(week, old_day)] = new_day
+    return day_moves
 
 
 def normalize_catalog_course_type(course_type: str) -> str | None:
@@ -361,7 +443,7 @@ class RunnerProfile(BaseModel):
     weight: float = Field(ge=25, le=300)
     goal: str = "完成 10 公里"
     longestRunKm: float = Field(ge=0, le=500)
-    averageDailyKm: int = Field(ge=2, le=10)
+    averageDailyKm: int = Field(ge=1, le=10)
     latest10kMinutes: float | None = Field(default=None, gt=0)
     trainDays: int = Field(ge=1, le=7)
     targetMinutes: float | None = Field(default=None, gt=0)
@@ -419,19 +501,47 @@ def get_active_plan(db, user_id: str):
     return db.execute(text("SELECT * FROM training_plan WHERE user_id=:uid AND status='active' ORDER BY version DESC LIMIT 1"), {"uid": user_id}).mappings().first()
 
 
+def plan_explanation_for_plan(db, plan_id: str):
+    """Read the optional coach explanation saved with the Dify generation run."""
+    run = db.execute(text("""SELECT response_summary FROM ai_workflow_run
+      WHERE related_plan_id=:plan AND workflow_type='plan_generate' AND status='succeeded'
+      ORDER BY COALESCE(finished_at,created_at) DESC LIMIT 1"""), {"plan": plan_id}).mappings().first()
+    if not run or not run["response_summary"]:
+        return None
+    try:
+        outputs = json_value(run["response_summary"])
+        if isinstance(outputs, str):
+            outputs = json.loads(outputs)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return None
+    if not isinstance(outputs, dict):
+        return None
+    for key in ("plan_explanation", "planExplanation", "coach_explanation", "coachExplanation"):
+        value = outputs.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return None
+
+
 def plan_payload(db, plan):
     if not plan:
         return None
-    workouts = db.execute(text("""SELECT w.*, c.source_key, c.content AS course_content FROM workout w
-      LEFT JOIN course_catalog c ON c.id=w.course_id WHERE w.plan_id=:pid ORDER BY w.week_no,w.day_no"""), {"pid": plan["id"]}).mappings().all()
+    workouts = db.execute(text("""SELECT w.*, c.source_key, c.content AS course_content,
+      r.actual_distance_km AS actual_distance_km
+      FROM workout w
+      LEFT JOIN course_catalog c ON c.id=w.course_id
+      LEFT JOIN training_record r ON r.workout_id=w.id
+      WHERE w.plan_id=:pid ORDER BY w.week_no,w.day_no"""), {"pid": plan["id"]}).mappings().all()
     return {
         "id": plan["id"], "version": plan["version"], "status": plan["status"], "title": plan["title"],
         "goal": plan["goal"], "targetMinutes": float(plan["target_minutes"]) if plan["target_minutes"] is not None else None,
         "weeks": plan["weeks"], "trainDays": plan["train_days"], "summary": plan["summary"],
+        "planExplanation": plan_explanation_for_plan(db, plan["id"]),
         "createdAt": plan["created_at"].isoformat(), "workouts": [{
             "id": w["id"], "week": w["week_no"], "day": w["day_no"], "type": w["type"], "title": w["title"],
             "durationMin": w["duration_min"], "distanceKm": float(w["distance_km"]) if w["distance_km"] is not None else None,
             "distanceRangeKm": workout_range_payload(w)[0], "paceRangeMinPerKm": workout_range_payload(w)[1],
+            "actualDistanceKm": float(w["actual_distance_km"]) if w["actual_distance_km"] is not None else None,
             "intensity": w["intensity"], "talkTest": w["talk_test"], "purpose": w["purpose"],
             "prerequisite": w["prerequisite"], "downgradeRule": w["downgrade_rule"], "status": w["status"],
             "courseId": w["course_id"], "courseKey": w["source_key"], "courseName": w["title"],
@@ -568,7 +678,7 @@ def parse_json_output(value: Any, label: str) -> dict:
 
 def plan_from_dify(db, user_id: str, profile: dict):
     if profile.get("averageDailyKm") is None:
-        raise HTTPException(status_code=409, detail="请先补充平均日跑量（2–10 公里整数）后再生成计划")
+        raise HTTPException(status_code=409, detail="请先补充平均日跑量（1–10 公里整数）后再生成计划")
     body_data = dict(profile.get("bodyData") or {})
     body_data.pop("level", None)
     body_data.update({"height_cm": profile["height"], "weight_kg": profile["weight"]})
@@ -593,6 +703,8 @@ def plan_from_dify(db, user_id: str, profile: dict):
     distances_by_position = {}
     titles_by_position = {}
     course_ids_by_position = {}
+    raw_types_by_position = {}
+    course_keys_by_position = {}
     type_map = {"easy":"easy", "aerobic_base":"easy", "easy,aerobic_base":"easy", "run_walk":"easy", "recovery":"recovery", "long":"long", "long_run":"long", "quality":"quality", "strides":"quality", "tempo":"tempo", "interval":"interval", "rest":"rest", "other":"other"}
     for item in workouts:
         if not isinstance(item, dict): raise HTTPException(status_code=502, detail="Dify 计划包含无效训练条目")
@@ -623,16 +735,41 @@ def plan_from_dify(db, user_id: str, profile: dict):
         ranges_by_position[(week, day)] = (distance_min, distance_max, pace_range)
         distances_by_position[(week, day)] = distance
         titles_by_position[(week, day)] = course_name
+        raw_types_by_position[(week, day)] = str(item.get("type") or "").lower()
+        course_keys_by_position[(week, day)] = course_key
         normalized.append((week, day, workout_type))
     if len({(week, day) for week, day, _ in normalized}) != len(normalized):
         raise HTTPException(status_code=502, detail="Dify 计划重复安排了同一训练日期")
-    quality_slots = {(w, day) for w, day, kind in normalized if kind in {"quality", "tempo", "interval"}}
+    primary_quality_types = {"quality", "tempo", "interval"}
     for week in range(1, weeks + 1):
         rows = sorted((day, kind) for w, day, kind in normalized if w == week)
         if len(rows) > days or not any(kind in {"easy", "recovery"} for _, kind in rows):
             raise HTTPException(status_code=502, detail="Dify 计划不符合每周训练次数或轻松/恢复课约束")
-        if sum(kind in {"quality", "tempo", "interval"} for _, kind in rows) > 2:
+        if sum(raw_types_by_position[(week, day)] in primary_quality_types and course_keys_by_position[(week, day)] != "ST-4" for day, _ in rows) > 2:
             raise HTTPException(status_code=502, detail="Dify 计划每周质量课超过 2 次")
+
+    day_moves = schedule_with_long_quality_spacing(normalized, raw_types_by_position, course_keys_by_position, weeks)
+    if day_moves is None:
+        raise HTTPException(status_code=502, detail="Dify 计划无法在每周 7 天内安排长距离课与质量课之间的间隔")
+    if any(old_day != new_day for (week, old_day), new_day in day_moves.items()):
+        def move_positions(values):
+            return {(week, day_moves[(week, day)]): value for (week, day), value in values.items()}
+
+        normalized = [(week, day_moves[(week, day)], kind) for week, day, kind in normalized]
+        ranges_by_position = move_positions(ranges_by_position)
+        distances_by_position = move_positions(distances_by_position)
+        titles_by_position = move_positions(titles_by_position)
+        course_ids_by_position = move_positions(course_ids_by_position)
+        raw_types_by_position = move_positions(raw_types_by_position)
+        course_keys_by_position = move_positions(course_keys_by_position)
+        for item in workouts:
+            week, old_day = int(item["week"]), parse_workout_day(item["day"])
+            item["day"] = day_moves[(week, old_day)]
+
+    quality_slots = {(w, day) for w, day, _ in normalized
+                     if raw_types_by_position[(w, day)] in primary_quality_types and course_keys_by_position[(w, day)] != "ST-4"}
+    for week in range(1, weeks + 1):
+        rows = sorted((day, kind) for w, day, kind in normalized if w == week)
         for day, kind in rows:
             if kind == "long":
                 adjacent = {(week, day - 1), (week, day + 1)}

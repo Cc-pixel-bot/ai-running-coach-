@@ -15,3 +15,6 @@ npm-debug.log*
 Thumbs.db
 __pycache__/
 *.py[cod]
+
+# Local evaluation workbench outputs
+/evaluation_workbench/

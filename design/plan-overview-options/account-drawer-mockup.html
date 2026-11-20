@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>计划总览 · 个人导航样式预览</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Microsoft YaHei",sans-serif;color:#17344a}body{min-height:100vh;background:linear-gradient(135deg,#e3f4ff 0%,#d9f4ef 50%,#e7f8eb 100%);display:grid;place-items:center;padding:16px}.board{width:min(100%,390px)}.board-title{margin:0 0 14px 6px;font-size:13px;font-weight:700;color:#527084;letter-spacing:.02em}.phone{position:relative;width:100%;height:min(740px,calc(100vh - 56px));min-height:600px;overflow:hidden;border:6px solid rgba(255,255,255,.94);border-radius:30px;background:linear-gradient(180deg,#f7fafb 0%,#f0f6f8 100%);box-shadow:0 22px 55px rgba(37,102,118,.2)}.status{height:37px;display:flex;align-items:center;justify-content:space-between;padding:0 21px;font-size:11px;font-weight:750;color:#668093;text-shadow:none}.status-icons{letter-spacing:2px}.topbar{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:relative;z-index:1}.avatar-button{width:34px;height:34px;padding:0;border:1px solid rgba(28,122,153,.25);border-radius:50%;background:#fff;box-shadow:0 3px 9px rgba(10,65,95,.12);overflow:hidden}.avatar-button img{width:100%;height:100%;object-fit:cover}.page-name{font-size:15px;font-weight:700;color:#173b4e;text-shadow:none}.topbar-space{width:42px}.main{position:absolute;inset:91px 0 0;padding:24px 22px;color:#17344a;background:linear-gradient(160deg,#f8fbfc,#edf5f7)}.main:before{content:"";position:absolute;right:-80px;top:40px;width:240px;height:240px;border:1px solid rgba(57,166,174,.12);border-radius:50%;box-shadow:0 0 0 17px rgba(57,166,174,.035),0 0 0 36px rgba(57,166,174,.02);pointer-events:none}.main-content{position:relative;z-index:1}.main h1{margin:0 0 20px;font-size:26px;line-height:1.2;letter-spacing:-.03em}.summary{display:flex;align-items:center;gap:17px}.progress{width:92px;height:92px;flex:0 0 92px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#27b7ad 0 25%,#dcefeb 25% 100%);position:relative}.progress:before{content:"";position:absolute;inset:7px;border-radius:50%;background:linear-gradient(145deg,#effbfa,#f6fcff)}.progress-copy{position:relative;text-align:center;color:#17344a}.progress-copy strong{display:block;font-size:20px;line-height:1}.progress-copy small{display:block;margin-top:4px;font-size:9px;color:#7992a2}.metrics{display:grid;grid-template-columns:1fr 1fr;flex:1;gap:13px 14px;border-left:1px solid rgba(255,255,255,.4);padding-left:16px}.metric-label{display:block;font-size:10px;color:#8496a2;margin-bottom:4px}.metric-value{font-size:13px;font-weight:750;color:#1c3645}.dim{position:absolute;inset:0;background:rgba(17,52,67,.12);z-index:2}.drawer{position:absolute;z-index:3;top:91px;left:0;width:min(40%,150px);height:auto;padding:6px 8px 8px;background:radial-gradient(circle at 12% 0%,rgba(255,255,255,.92),transparent 42%),linear-gradient(155deg,#dff3ff 0%,#dff6f1 54%,#e6f7e9 100%);border-radius:0 14px 14px 0;box-shadow:8px 8px 24px rgba(37,102,118,.16);backdrop-filter:blur(18px)}.drawer-list{margin-top:0}.drawer-row{min-height:44px;display:flex;align-items:center;gap:4px;border-bottom:1px solid rgba(91,151,158,.16);color:#234d5c}.drawer-row:last-child{border-bottom:0}.account-avatar{width:30px;height:30px;flex:0 0 30px;border-radius:50%;object-fit:cover;box-shadow:0 3px 11px rgba(24,89,123,.16)}.account-copy{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:1;min-width:0}.account-copy strong,.row-label{font-size:13px;font-weight:700}.account-copy span{font-size:10px;color:#64818b;white-space:nowrap}.row-icon{width:24px;height:24px;flex:0 0 24px;display:grid;place-items:center;color:#328c94}.row-icon svg{width:19px;height:19px}.chevron{margin-left:auto;color:#4f9ca0;font-size:18px}.logout{color:#234d5c}.logout .row-icon{color:#69949a}.spacer,.safe-bottom{display:none}
+</style>
+</head>
+<body>
+<div class="board"><h1 class="board-title">计划总览 · 左侧个人导航样式预览</h1><div class="phone">
+  <div class="status"><span>9:41</span><span class="status-icons">●●● ▰</span></div>
+  <header class="topbar"><button class="avatar-button" aria-label="我的"><img src="assets/account-avatar-gradient.png" alt=""></button><div class="page-name">计划总览</div><div class="topbar-space"></div></header>
+  <main class="main"><div class="main-content"><h1>训练计划</h1><div class="summary"><div class="progress"><div class="progress-copy"><strong>0%</strong><small>0/0 节</small></div></div><div class="metrics"><div><span class="metric-label">目标距离</span><span class="metric-value">10 km</span></div><div><span class="metric-label">目标成绩</span><span class="metric-value">—</span></div><div><span class="metric-label">计划周期</span><span class="metric-value">等待 Dify 计划</span></div><div><span class="metric-label">频次 &amp; 总量</span><span class="metric-value">等待计划数据</span></div></div></div></div></main>
+  <div class="dim"></div>
+  <aside class="drawer" aria-label="个人导航">
+    <div class="drawer-list">
+      <div class="drawer-row"><span class="row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0"></path></svg></span><div class="account-copy"><strong>账户</strong><span>runner_001</span></div></div>
+      <div class="drawer-row"><span class="row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="3"></rect><circle cx="10" cy="9" r="2"></circle><path d="M7.5 15a2.5 2.5 0 0 1 5 0m2-5h2.5m-2.5 3h2.5"></path></svg></span><span class="row-label">我的档案</span></div>
+      <div class="drawer-row logout"><span class="row-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10"></path><path d="M13 8l4 4-4 4m4-4H8"></path></svg></span><span class="row-label">退出账号</span></div>
+    </div><div class="spacer"></div><div class="safe-bottom"></div>
+  </aside>
+</div></div>
+</body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+

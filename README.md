@@ -17,6 +17,8 @@ database/
   001_init_mysql.sql         新库完整初始化结构
   002_表中文注释.sql         数据表字段注释
   003_workout_distance_pace.sql  已有数据库结构升级
+tools/evaluation/                 评测样本生成工具
+evaluation_workbench/             本地评测过程文件（Git 忽略）
 backend/                     FastAPI API、Dify 调用与数据持久化
 docker-compose.yml           本项目独立 API 与 MySQL 服务
 .env.example                 本地配置模板；实际密钥仅保存在未跟踪的 .env

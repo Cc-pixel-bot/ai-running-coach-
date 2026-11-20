@@ -1,0 +1,176 @@
+<!DOCTYPE html><html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<meta content="mobile_tab" name="shell-type">
+<title>完整训练计划</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            DEFAULT: "#007AFF",
+            subtle: "#F0F6FF",
+            border: "#BFDBFE"
+          },
+          status: {
+            green: "#34C759",
+            greenBg: "#EBF9EE",
+            greenBorder: "#D1F2D9"
+          }
+        },
+        fontFamily: {
+          sans: ["-apple-system", "BlinkMacSystemFont", "SF Pro Text", "SF Pro Display", "Inter", "Helvetica Neue", "sans-serif"]
+        }
+      }
+    }
+  };
+</script>
+<style>
+  @layer base {
+    html, body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      overscroll-behavior-y: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+    }
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 24px); }
+    .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+  }
+  ::-webkit-scrollbar { display: none; }
+</style>
+<link rel="stylesheet" href="../assets/mobile.css?v=20261116-plan-overview-scroll-1"></head>
+<body class="min-h-full bg-[#F8F9FA] text-[#1D1D1F] antialiased flex flex-col font-sans selection:bg-[#007AFF]/10" data-page="plan-overview">
+<!-- 极简克制顶部导航条 -->
+<header class="fixed top-0 inset-x-0 z-50 bg-[#F8F9FA]/90 backdrop-blur-xl border-b border-black/[0.04] pt-safe">
+<div class="h-11 px-3 flex items-center justify-between">
+<button aria-label="返回" class="w-10 h-10 -ml-1 flex items-center justify-center text-[#1D1D1F] active:opacity-40 transition-opacity cursor-pointer" type="button">
+<span class="material-symbols-outlined text-[20px] font-medium text-[#1D1D1F]">arrow_back_ios_new</span>
+</button>
+<span class="text-[15px] font-semibold text-[#1D1D1F] tracking-tight">计划总览</span>
+<div class="w-10 h-10"></div>
+</div>
+</header>
+<!-- 主体内容区域：纵向长滚动浏览 -->
+<main class="flex-1 w-full pt-14 pb-14 pb-safe">
+<div class="max-w-md mx-auto px-4 flex flex-col gap-6">
+<!-- 顶部计划摘要看板 -->
+<section class="pt-3 pb-2 flex flex-col gap-4">
+<div class="flex flex-col gap-1.5">
+
+<h1 class="text-[26px] font-bold text-[#1D1D1F] tracking-tight leading-tight">10公里耐力突破计划</h1>
+
+</div>
+<!-- 精致双列/环形卡片区 -->
+<div class="flex items-center gap-4 py-1">
+<!-- 左侧环形进度圈 -->
+<div class="relative w-24 h-24 shrink-0 flex items-center justify-center">
+<svg class="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
+<!-- 底圈 -->
+<circle cx="48" cy="48" fill="none" r="40" stroke="#E5E7EB" stroke-width="7"></circle>
+<!-- 进度圈: 25% -->
+<circle cx="48" cy="48" fill="none" r="40" stroke="#007AFF" stroke-dasharray="251.32" stroke-dashoffset="188.49" stroke-linecap="round" stroke-width="7"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-[17px] font-bold tracking-tight text-[#1D1D1F] leading-none">25<span class="text-[11px] font-semibold text-[#007AFF]">%</span></span>
+<span class="text-[10px] text-[#86868B] mt-0.5 font-medium">6/24 节</span><span class="text-[9px] text-[#007AFF] font-medium bg-[#007AFF]/10 px-1 rounded-sm mt-0.5">已跑37km</span>
+</div>
+</div>
+<!-- 右侧关键指标矩阵 -->
+<div class="flex-1 grid grid-cols-2 gap-y-2.5 gap-x-2 border-l border-black/[0.06] pl-4">
+<div class="flex flex-col">
+<span class="text-[11px] text-[#86868B]">目标距离</span>
+<span class="text-[14px] font-bold text-[#1D1D1F] tracking-tight">10 km</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] text-[#86868B]">目标成绩</span>
+<div class="flex items-baseline gap-1">
+<span class="text-[14px] font-bold text-[#1D1D1F]">—</span>
+<span class="text-[10px] text-[#86868B]"></span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] text-[#86868B]">计划周期</span>
+<span class="text-[14px] font-bold text-[#1D1D1F]">共 8 周</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] text-[#86868B]">频次 &amp; 总量</span>
+<span class="text-[13px] font-bold text-[#1D1D1F]">3-4次 · 168km</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 连续纵向时间线 (Timeline) -->
+<div class="relative flex flex-col pl-2"></div>
+</div>
+</main>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+(() => {
+  const weeks = [
+    { label: '已完成', done: 3, sessions: [['初阶适应跑','5.0 km · 31分','done'],['有氧基础慢跑','6.0 km · 37分','done'],['周末基础耐力跑','7.0 km · 44分','done']] },
+    { label: '已完成', done: 3, sessions: [['轻松恢复跑','5.0 km · 31分','done'],['节奏感知训练','6.0 km · 36分','done'],['周末耐力跑','8.0 km · 50分','done']] },
+    { label: '进行中', done: 0, current: 0, sessions: [['有氧筑底配速跑','6.0 km · 38分','current'],['轻松恢复跑','5.0 km · 32分','pending'],['周末基础耐力跑','9.0 km · 56分','pending']] },
+    { label: '待开始', sessions: [['轻松跑','6.0 km · 38分','pending'],['节奏跑','7.0 km · 42分','pending'],['长距离耐力跑','10.0 km · 62分','pending']] },
+    { label: '待开始', sessions: [['有氧跑','6.0 km · 38分','pending'],['节奏间歇跑','7.0 km · 42分','pending'],['长距离耐力跑','11.0 km · 68分','pending']] },
+    { label: '待开始', sessions: [['轻松恢复跑','6.0 km · 39分','pending'],['稳态节奏跑','8.0 km · 48分','pending'],['周末耐力跑','12.0 km · 74分','pending']] },
+    { label: '待开始', sessions: [['轻松跑','6.0 km · 38分','pending'],['目标配速练习','7.0 km · 40分','pending'],['渐进长跑','10.0 km · 62分','pending']] },
+    { label: '待开始', sessions: [['轻松恢复跑','5.0 km · 32分','pending'],['赛前唤醒跑','4.0 km · 24分','pending'],['10公里目标跑','10.0 km · 55分','pending']] }
+  ];
+  const timeline = document.querySelector('main .relative.flex.flex-col.pl-2');
+  if (!timeline) return;
+  timeline.innerHTML = '<div class="absolute left-[18px] top-6 bottom-6 w-[2px] bg-gradient-to-b from-[#34C759] via-[#007AFF] to-[#C1C6D7]/40 pointer-events-none z-0"></div>';
+  weeks.forEach((week, index) => {
+    const number = index + 1;
+    const details = document.createElement('details');
+    details.className = `group relative ${number === 8 ? 'mb-2' : 'mb-6'} z-10`;
+    details.open = number === 3;
+    const complete = week.label === '已完成';
+    const active = week.label === '进行中';
+    const summary = document.createElement('summary');
+    summary.className = 'list-none cursor-pointer flex items-center gap-3 select-none';
+    const badge = document.createElement('div');
+    badge.className = complete ? 'w-9 h-9 rounded-full bg-[#34C759] text-white flex items-center justify-center font-bold text-[13px] shadow-[0_2px_8px_rgba(52,199,89,0.35)] shrink-0 ring-4 ring-[#F8F9FA]' : active ? 'w-9 h-9 rounded-full bg-[#007AFF] text-white flex items-center justify-center font-bold text-[13px] shrink-0 ring-4 ring-[#F8F9FA]' : 'w-9 h-9 rounded-full bg-white border border-[#C1C6D7] text-[#717786] flex items-center justify-center font-bold text-[13px] shrink-0 ring-4 ring-[#F8F9FA]';
+    badge.textContent = `W${number}`;
+    const right = complete ? `${week.done}/3 已完成` : active ? '进行中' : '3节训练';
+    const tone = complete ? 'text-[#34C759]' : active ? 'text-[#007AFF]' : 'text-[#86868B]';
+    summary.innerHTML = `<div class="flex-1 flex items-center justify-between min-w-0 pr-1 py-1"><span class="text-[14px] font-bold text-[#1D1D1F]">第 ${number} 周</span><span class="text-[11px] font-semibold ${tone}">${right}</span></div>`;
+    summary.prepend(badge);
+    const body = document.createElement('div');
+    body.className = 'ml-[18px] pl-6 pt-1.5 flex flex-col';
+    week.sessions.forEach((session, i) => {
+      const [name, meta, status] = session;
+      const row = document.createElement('div');
+      row.className = `relative ${status === 'current' ? 'py-3' : 'py-2.5'} flex items-center justify-between gap-3`;
+      const dot = status === 'done' ? 'bg-[#34C759]' : status === 'current' ? 'bg-[#007AFF]' : 'bg-[#C1C6D7]';
+      const textTone = status === 'current' ? 'font-bold text-[#007AFF]' : 'font-semibold text-[#86868B]';
+      const state = status === 'done' ? '已完成' : status === 'current' ? '进行中' : '待开始';
+      const stateTone = status === 'done' ? 'text-[#34C759]' : status === 'current' ? 'text-[#007AFF]' : 'text-[#86868B]';
+      row.innerHTML = `<div class="absolute -left-[28px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full ${dot} ring-2 ring-[#F8F9FA]"></div><div class="flex flex-col items-start gap-1 min-w-0 flex-1"><div class="flex items-center gap-2.5 min-w-0"><span class="text-[12px] ${textTone} shrink-0">Day ${i + 1}</span><span class="text-[13px] font-medium text-[#1D1D1F] truncate">${name}</span></div><span class="text-[10px] text-[#86868B]">${meta}</span></div><span class="text-[11px] font-semibold ${stateTone} shrink-0">${state}</span>`;
+      body.append(row);
+    });
+    details.append(summary, body);
+    timeline.append(details);
+  });
+})();
+</script></body></html>
+
+
