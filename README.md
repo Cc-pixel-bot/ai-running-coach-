@@ -8,9 +8,10 @@
 docs/
   product/                   产品需求文档
   knowledge-base/            首次计划课程库、反馈规则、动作参考
-design/prototype/            UI 参考稿，不是运行页面
+design/prototype/            历史 UI 原型与独立页面样稿，不是运行页面
+design/plan-overview-options/ 计划总览与导航样式方案
 frontend/
-  pages/                     当前正式页面（01–19）
+  pages/                     当前正式页面（01–20；11 已移出主流程）
   assets/                    共享脚本、样式和图片资源
   redesign/                  旧页面地址的兼容跳转
 database/
@@ -24,7 +25,7 @@ docker-compose.yml           本项目独立 API 与 MySQL 服务
 .env.example                 本地配置模板；实际密钥仅保存在未跟踪的 .env
 ```
 
-正式运行代码位于 `frontend/`、`backend/` 和 `database/`；产品需求与知识库位于 `docs/`。UI 原型和兼容跳转页不作为正式页面源文件。首次计划和训练反馈调整均由 Dify 工作流生成；后端负责身份、参数、课程与计划约束校验，以及保存和返回结果。
+正式运行代码位于 `frontend/`、`backend/` 和 `database/`；产品需求与知识库位于 `docs/`。UI 原型和兼容跳转页不作为正式页面源文件。独立计划总览样稿保存在 `design/prototype/pages/`；侧边栏只读档案是正式第 20 页，建档确认仍使用第 07 页。首次计划和训练反馈调整均由 Dify 工作流生成；后端负责身份、参数、课程与计划约束校验，以及保存和返回结果。
 
 ## 启动应用
 
